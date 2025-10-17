@@ -1,0 +1,39 @@
+{% extends "homepage.html" %}
+{% load static %}
+
+{% block Titulo %}
+Dashboard - Haras Cavalcanti
+{% endblock %}
+
+{% block body %}
+{% include "navbar.html" %}
+
+<main class="container">
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="page-content active">
+        {% include "dashboard_cards.html" %}
+        {% include "dashboard_tabs.html" %}
+    </section>
+
+    <!-- Relatórios Section -->
+    <section id="relatorios" class="page-content">
+        {% include "relatorios_content.html" %}
+    </section>
+
+    <!-- Configurações Section -->
+    <section id="configuracoes" class="page-content">
+        {% include "configuracoes_content.html" %}
+    </section>
+
+    <!-- Ajuda Section -->
+    <section id="ajuda" class="page-content">
+        {% include "ajuda_content.html" %}
+    </section>
+</main>
+
+{% include "footer.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

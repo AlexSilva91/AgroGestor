@@ -1,0 +1,141 @@
+<div class="section-tabs">
+    <div class="tab active" data-tab="lancamentos">Lançamentos Financeiros</div>
+    <div class="tab" data-tab="animais">Animais</div>
+    <div class="tab" data-tab="rebanhos">Rebanhos</div>
+    <div class="tab" data-tab="pastagens">Pastagens</div>
+    <div class="tab" data-tab="movimentacoes">Movimentações</div>
+</div>
+
+<div class="content-area">
+    <!-- Lançamentos Financeiros -->
+    <div id="lancamentos" class="tab-content active">
+        <div class="section-header">
+            <h2>Lançamentos Financeiros</h2>
+            <button class="btn btn-primary" id="addLancamento">
+                <i class="fas fa-plus"></i> Novo Lançamento
+            </button>
+        </div>
+        <div class="table-container">
+            <table id="lancamentosTable">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Categoria</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                        <th>Animal</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão inseridos via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Animais -->
+    <div id="animais" class="tab-content">
+        <div class="section-header">
+            <h2>Animais</h2>
+            <button class="btn btn-primary" id="addAnimal">
+                <i class="fas fa-plus"></i> Novo Animal
+            </button>
+        </div>
+        <div class="table-container">
+            <table id="animaisTable">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Sexo</th>
+                        <th>Nascimento</th>
+                        <th>Peso</th>
+                        <th>Raça</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão inseridos via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Rebanhos -->
+    <div id="rebanhos" class="tab-content">
+        <div class="section-header">
+            <h2>Rebanhos</h2>
+            <button class="btn btn-primary" id="addRebanho">
+                <i class="fas fa-plus"></i> Novo Rebanho
+            </button>
+        </div>
+        <div class="table-container">
+            <table id="rebanhosTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Capacidade</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão inseridos via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pastagens -->
+    <div id="pastagens" class="tab-content">
+        <div class="section-header">
+            <h2>Pastagens</h2>
+            <button class="btn btn-primary" id="addPastagem">
+                <i class="fas fa-plus"></i> Nova Pastagem
+            </button>
+        </div>
+        <div class="table-container">
+            <table id="pastagensTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Área (ha)</th>
+                        <th>Capacidade</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão inseridos via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Movimentações -->
+    <div id="movimentacoes" class="tab-content">
+        <div class="section-header">
+            <h2>Movimentações de Animais</h2>
+            <button class="btn btn-primary" id="addMovimentacao">
+                <i class="fas fa-plus"></i> Nova Movimentação
+            </button>
+        </div>
+        <div class="table-container">
+            <table id="movimentacoesTable">
+                <thead>
+                    <tr>
+                        <th>Animal</th>
+                        <th>Pastagem</th>
+                        <th>Entrada</th>
+                        <th>Saída</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dados serão inseridos via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
