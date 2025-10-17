@@ -154,12 +154,10 @@
                     <tr>
                         <th>ID</th>
                         <th>Nome</th>
+                        <th>Tipo</th>
                         <th>E-mail</th>
-                        <th>Username</th>
-                        <th>Grupo</th>
                         <th>Status</th>
                         <th>Último Login</th>
-                        <th>Data de Cadastro</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -174,23 +172,15 @@
                                 </div>
                                 <div class="user-details">
                                     <strong>{{ user.get_full_name|default:user.username }}</strong>
-                                    {% if user.is_superuser %}
-                                    <span class="badge badge-danger">Superuser</span>
-                                    {% elif user.is_staff %}
-                                    <span class="badge badge-secondary">Staff</span>
-                                    {% endif %}
                                 </div>
                             </div>
                         </td>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.username }}</td>
                         <td>
-                            {% for group in user.groups.all %}
-                            <span class="badge badge-success">{{ group.name }}</span>
-                            {% empty %}
-                            <span class="text-muted">Sem grupo</span>
-                            {% endfor %}
-                        </td>
+                            <span class="role-badge role-{{ user.role|lower }}">
+                                {{ user.get_role_display }}
+                            </span>
+                        </td>                        
+                        <td>{{ user.email }}</td>
                         <td>
                             {% if user.is_active %}
                             <span class="badge badge-success">Ativo</span>
@@ -205,7 +195,6 @@
                             <span class="text-muted">Nunca logou</span>
                             {% endif %}
                         </td>
-                        <td>{{ user.date_joined|date:"d/m/Y" }}</td>
                         <td class="actions">
                             <button class="btn btn-secondary btn-sm" onclick="editarUsuario('{{ user.id }}')"
                                 title="Editar">

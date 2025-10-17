@@ -816,3 +816,51 @@ select option {
 * {
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
+/* === BADGES DE PAPEL (ROLE) === */
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
+    backdrop-filter: blur(10px);
+}
+
+/* Admin */
+.role-admin {
+    background: rgba(211, 47, 47, 0.15);
+    color: var(--danger);
+    border-color: rgba(211, 47, 47, 0.4);
+}
+
+/* Fazendeiro */
+.role-fazendeiro {
+    background: rgba(46, 125, 50, 0.15);
+    color: var(--primary-light);
+    border-color: rgba(46, 125, 50, 0.4);
+}
+
+/* Funcionário */
+.role-funcionario {
+    background: rgba(255, 152, 0, 0.15);
+    color: var(--secondary);
+    border-color: rgba(255, 152, 0, 0.4);
+}
+
+/* Veterinário */
+.role-veterinario {
+    background: rgba(25, 118, 210, 0.15);
+    color: #64b5f6;
+    border-color: rgba(25, 118, 210, 0.4);
+}
+
+/* Efeito hover opcional */
+.role-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.05);
+}
