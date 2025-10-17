@@ -47,6 +47,11 @@ INSTALLED_APPS = [
     'iot',
 ]
 
+# Configurações de autenticação
+LOGIN_URL = '/'  # Define a rota raiz como página de login
+LOGIN_REDIRECT_URL = '/dashboard/'  # Para onde redirecionar após login bem-sucedido
+LOGOUT_REDIRECT_URL = '/'  # Para onde redirecionar após logout
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

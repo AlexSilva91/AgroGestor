@@ -22,11 +22,12 @@
 
                 <div class="login-form">
                     <form id="loginForm">
+                        {% csrf_token %}
                         <div class="form-group">
                             <label for="login">Login</label>
                             <div class="input-with-icon">
                                 <i class="fas fa-user"></i>
-                                <input type="text" id="login" placeholder="joao.silva" required>
+                                <input type="text" id="login" name="login" placeholder="joao.silva" required>
                             </div>
                         </div>
 
@@ -34,22 +35,26 @@
                             <label for="password">Senha</label>
                             <div class="input-with-icon">
                                 <i class="fas fa-lock"></i>
-                                <input type="password" id="password" placeholder="Sua senha" required>
+                                <input type="password" id="password" name="password" placeholder="Sua senha" required>
                             </div>
                         </div>
 
                         <div class="form-options">
                         </div>
 
-                        <button type="submit" class="btn-login">Entrar</button>
+                        <button type="submit" class="btn-login" id="loginButton">
+                            <span class="button-text">Entrar</span>
+                            <div class="spinner hidden" id="spinner"></div>
+                        </button>
 
+                        <div id="message" class="message hidden"></div>
                     </form>
                 </div>
             </div>
         </div>
     </main>
 
-    {% include "footer.html" %}
+    {% include "base/footer.html" %}
     <script src="{% static 'js/login.js' %}"></script>
 </body>
 

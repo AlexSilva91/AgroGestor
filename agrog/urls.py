@@ -15,11 +15,44 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
+from django.contrib import messages
+from django.shortcuts import redirect
 from core import views
+
+def catch_all_view(request, unused_path):
+    """Captura todas as rotas não mapeadas"""
+    messages.error(request, f'Página "{request.path}" não encontrada.')
+    return redirect('login')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
-    path('dashboard/', views.dashboard, name='dashboard_admin'),
+    path('', views.login_view, name='login'),
+    path('login/ajax/', views.login_ajax, name='login_ajax'),
+    path('logout/', views.logout_view, name='logout'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+
+
+    re_path(r'^(?P<unused_path>.*)$', catch_all_view),
 ]
+
+# Handlers personalizados - devem estar no nível do projeto
+def handler404(request, exception):
+    """Handler personalizado para 404"""
+    messages.error(request, 'Página não encontrada.')
+    return redirect('login')
+
+def handler403(request, exception):
+    """Handler personalizado para 403 (permissão negada)"""
+    messages.error(request, 'Você não tem permissão para acessar esta página.')
+    return redirect('login')
+
+def handler500(request):
+    """Handler personalizado para 500"""
+    messages.error(request, 'Erro interno do servidor.')
+    return redirect('login')
+
+# Atribua os handlers
+handler404 = handler404
+handler403 = handler403
+handler500 = handler500
