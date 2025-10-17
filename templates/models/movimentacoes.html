@@ -1,0 +1,126 @@
+<div id="movimentacoes" class="tab-content">
+    <div class="section-header">
+        <h2>Movimentações de Animais</h2>
+        <button class="btn btn-primary" id="addMovimentacao">
+            <i class="fas fa-plus"></i> Nova Movimentação
+        </button>
+    </div>
+    <div class="table-container">
+        <table id="movimentacoesTable">
+            <thead>
+                <tr>
+                    <th>Animal</th>
+                    <th>Pastagem</th>
+                    <th>Entrada</th>
+                    <th>Saída</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for movimentacao in movimentacoes %}
+                <tr>
+                    <td>{{ movimentacao.animal.codigo }}</td>
+                    <td>{{ movimentacao.pastagem.nome }}</td>
+                    <td>{{ movimentacao.data_entrada|date:"d/m/Y" }}</td>
+                    <td>{{ movimentacao.data_saida|date:"d/m/Y"|default:"-" }}</td>
+                    <td class="actions">
+                        <button class="btn btn-secondary btn-sm" onclick="editarMovimentacao('{{ movimentacao.id }}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="excluirMovimentacao('{{ movimentacao.id }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-exchange-alt fa-3x"></i>
+                            <h3>Nenhuma movimentação encontrada</h3>
+                            <p>Clique no botão "Nova Movimentação" para adicionar o primeiro registro.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para Cadastro/Edição de Movimentações -->
+<div id="movimentacaoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="movimentacaoModalTitle">Nova Movimentação</h3>
+            <button type="button" class="close-btn" onclick="fecharModal('movimentacaoModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="movimentacaoForm" method="POST">
+                {% csrf_token %}
+                <input type="hidden" id="movimentacao_id" name="movimentacao_id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="animal">Animal *</label>
+                        <select id="animal" name="animal" required>
+                            <option value="">Selecione um animal...</option>
+                            {% for animal in animais %}
+                            <option value="{{ animal.id }}">{{ animal.codigo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pastagem">Pastagem *</label>
+                        <select id="pastagem" name="pastagem" required>
+                            <option value="">Selecione uma pastagem...</option>
+                            {% for pastagem in pastagens %}
+                            <option value="{{ pastagem.id }}">{{ pastagem.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="data_entrada">Data de Entrada *</label>
+                        <input type="date" id="data_entrada" name="data_entrada" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="data_saida">Data de Saída</label>
+                        <input type="date" id="data_saida" name="data_saida">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="observacoes">Observações</label>
+                        <textarea id="observacoes" name="observacoes" rows="3"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModal('movimentacaoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Movimentação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div id="confirmDeleteMovimentacao" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Exclusão</h3>
+            <button type="button" class="close-btn" onclick="fecharModal('confirmDeleteMovimentacao')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Tem certeza que deseja excluir esta movimentação? Esta ação não pode ser desfeita.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="fecharModal('confirmDeleteMovimentacao')">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteMovimentacaoBtn">Excluir</button>
+        </div>
+    </div>
+</div>

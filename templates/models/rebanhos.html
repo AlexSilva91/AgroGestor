@@ -1,0 +1,126 @@
+<div id="rebanhos" class="tab-content">
+    <div class="section-header">
+        <h2>Rebanhos</h2>
+        <button class="btn btn-primary" id="addRebanho">
+            <i class="fas fa-plus"></i> Novo Rebanho
+        </button>
+    </div>
+    <div class="table-container">
+        <table id="rebanhosTable">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Capacidade</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rebanho in rebanhos %}
+                <tr>
+                    <td>{{ rebanho.nome }}</td>
+                    <td>{{ rebanho.capacidade }} animais</td>
+                    <td>
+                        <span class="badge {% if rebanho.status == 'ativo' %}badge-success{% else %}badge-secondary{% endif %}">
+                            {{ rebanho.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="actions">
+                        <button class="btn btn-secondary btn-sm" onclick="editarRebanho('{{ rebanho.id }}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="excluirRebanho('{{ rebanho.id }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-users fa-3x"></i>
+                            <h3>Nenhum rebanho encontrado</h3>
+                            <p>Clique no botão "Novo Rebanho" para adicionar o primeiro registro.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para Cadastro/Edição de Rebanhos -->
+<div id="rebanhoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="rebanhoModalTitle">Novo Rebanho</h3>
+            <button type="button" class="close-btn" onclick="fecharModal('rebanhoModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="rebanhoForm" method="POST">
+                {% csrf_token %}
+                <input type="hidden" id="rebanho_id" name="rebanho_id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nome">Nome *</label>
+                        <input type="text" id="nome" name="nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="capacidade">Capacidade *</label>
+                        <input type="number" id="capacidade" name="capacidade" min="1" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="status">Status *</label>
+                        <select id="status" name="status" required>
+                            <option value="ativo">Ativo</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pastagem">Pastagem Associada</label>
+                        <select id="pastagem" name="pastagem">
+                            <option value="">Selecione uma pastagem...</option>
+                            {% for pastagem in pastagens %}
+                            <option value="{{ pastagem.id }}">{{ pastagem.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="descricao">Descrição</label>
+                        <textarea id="descricao" name="descricao" rows="3"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModal('rebanhoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Rebanho</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div id="confirmDeleteRebanho" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Exclusão</h3>
+            <button type="button" class="close-btn" onclick="fecharModal('confirmDeleteRebanho')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Tem certeza que deseja excluir este rebanho? Esta ação não pode ser desfeita.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="fecharModal('confirmDeleteRebanho')">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteRebanhoBtn">Excluir</button>
+        </div>
+    </div>
+</div>

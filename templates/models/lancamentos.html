@@ -1,0 +1,145 @@
+<div id="lancamentos" class="tab-content active">
+    <div class="section-header">
+        <h2>Lançamentos Financeiros</h2>
+        <button class="btn btn-primary" id="addLancamento">
+            <i class="fas fa-plus"></i> Novo Lançamento
+        </button>
+    </div>
+    <div class="table-container">
+        <table id="lancamentosTable">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Categoria</th>
+                    <th>Valor</th>
+                    <th>Data</th>
+                    <th>Animal</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lancamento in lancamentos %}
+                <tr>
+                    <td>
+                        <span class="badge {% if lancamento.tipo == 'receita' %}badge-success{% else %}badge-danger{% endif %}">
+                            {{ lancamento.get_tipo_display }}
+                        </span>
+                    </td>
+                    <td>{{ lancamento.categoria }}</td>
+                    <td>R$ {{ lancamento.valor }}</td>
+                    <td>{{ lancamento.data|date:"d/m/Y" }}</td>
+                    <td>{{ lancamento.animal.codigo|default:"-" }}</td>
+                    <td class="actions">
+                        <button class="btn btn-secondary btn-sm" onclick="editarLancamento('{{ lancamento.id }}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="excluirLancamento('{{ lancamento.id }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-receipt fa-3x"></i>
+                            <h3>Nenhum lançamento encontrado</h3>
+                            <p>Clique no botão "Novo Lançamento" para adicionar o primeiro registro.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para Cadastro/Edição de Lançamentos -->
+<div id="lancamentoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="lancamentoModalTitle">Novo Lançamento</h3>
+            <button type="button" class="close-btn" onclick="fecharModal('lancamentoModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="lancamentoForm" method="POST">
+                {% csrf_token %}
+                <input type="hidden" id="lancamento_id" name="lancamento_id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tipo">Tipo *</label>
+                        <select id="tipo" name="tipo" required>
+                            <option value="">Selecione...</option>
+                            <option value="receita">Receita</option>
+                            <option value="despesa">Despesa</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoria">Categoria *</label>
+                        <select id="categoria" name="categoria" required>
+                            <option value="">Selecione...</option>
+                            <option value="venda_animal">Venda de Animal</option>
+                            <option value="compra_racao">Compra de Ração</option>
+                            <option value="servico_veterinario">Serviço Veterinário</option>
+                            <option value="manutencao">Manutenção</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="valor">Valor (R$) *</label>
+                        <input type="number" id="valor" name="valor" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="data">Data *</label>
+                        <input type="date" id="data" name="data" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="animal">Animal (opcional)</label>
+                        <select id="animal" name="animal">
+                            <option value="">Selecione um animal...</option>
+                            {% for animal in animais %}
+                            <option value="{{ animal.id }}">{{ animal.codigo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="descricao">Descrição</label>
+                        <textarea id="descricao" name="descricao" rows="3"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModal('lancamentoModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Lançamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div id="confirmDeleteLancamento" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Exclusão</h3>
+            <button type="button" class="close-btn" onclick="fecharModal('confirmDeleteLancamento')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Tem certeza que deseja excluir este lançamento? Esta ação não pode ser desfeita.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="fecharModal('confirmDeleteLancamento')">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteLancamentoBtn">Excluir</button>
+        </div>
+    </div>
+</div>

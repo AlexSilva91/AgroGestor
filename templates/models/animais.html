@@ -1,0 +1,144 @@
+<div id="animais" class="tab-content">
+    <div class="section-header">
+        <h2>Animais</h2>
+        <button class="btn btn-primary" id="addAnimal">
+            <i class="fas fa-plus"></i> Novo Animal
+        </button>
+    </div>
+    <div class="table-container">
+        <table id="animaisTable">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Sexo</th>
+                    <th>Nascimento</th>
+                    <th>Peso (kg)</th>
+                    <th>Raça</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for animal in animais %}
+                <tr>
+                    <td>{{ animal.codigo }}</td>
+                    <td>{{ animal.get_sexo_display }}</td>
+                    <td>{{ animal.data_nascimento|date:"d/m/Y" }}</td>
+                    <td>{{ animal.peso_atual }}</td>
+                    <td>{{ animal.raca }}</td>
+                    <td>
+                        <span class="badge {% if animal.status == 'ativo' %}badge-success{% else %}badge-secondary{% endif %}">
+                            {{ animal.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="actions">
+                        <button class="btn btn-secondary btn-sm" onclick="editarAnimal('{{ animal.id }}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="excluirAnimal('{{ animal.id }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-horse fa-3x"></i>
+                            <h3>Nenhum animal encontrado</h3>
+                            <p>Clique no botão "Novo Animal" para adicionar o primeiro registro.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal para Cadastro/Edição de Animais -->
+<div id="animalModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="animalModalTitle">Novo Animal</h3>
+            <button type="button" class="close-btn" onclick="fecharModal('animalModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="animalForm" method="POST">
+                {% csrf_token %}
+                <input type="hidden" id="animal_id" name="animal_id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="codigo">Código *</label>
+                        <input type="text" id="codigo" name="codigo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sexo">Sexo *</label>
+                        <select id="sexo" name="sexo" required>
+                            <option value="">Selecione...</option>
+                            <option value="m">Macho</option>
+                            <option value="f">Fêmea</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="data_nascimento">Data de Nascimento *</label>
+                        <input type="date" id="data_nascimento" name="data_nascimento" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="peso_atual">Peso Atual (kg) *</label>
+                        <input type="number" id="peso_atual" name="peso_atual" step="0.1" min="0" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="raca">Raça *</label>
+                        <input type="text" id="raca" name="raca" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status *</label>
+                        <select id="status" name="status" required>
+                            <option value="ativo">Ativo</option>
+                            <option value="inativo">Inativo</option>
+                            <option value="vendido">Vendido</option>
+                            <option value="falecido">Falecido</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="observacoes">Observações</label>
+                        <textarea id="observacoes" name="observacoes" rows="3"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModal('animalModal')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Animal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div id="confirmDeleteAnimal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirmar Exclusão</h3>
+            <button type="button" class="close-btn" onclick="fecharModal('confirmDeleteAnimal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Tem certeza que deseja excluir este animal? Esta ação não pode ser desfeita.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="fecharModal('confirmDeleteAnimal')">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteAnimalBtn">Excluir</button>
+        </div>
+    </div>
+</div>
