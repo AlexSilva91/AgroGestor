@@ -90,8 +90,17 @@ def dashboard(request):
     return render(request, 'base/dashboard_content.html', context)
 
 @login_required
+@require_http_methods(["POST", "GET"])
 def logout_view(request):
     """View para logout"""
     logout(request)
+    
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'message': 'Logout realizado com sucesso!',
+            'redirect_url': '/'
+        })
+    
     messages.success(request, 'Logout realizado com sucesso!')
     return redirect('login')

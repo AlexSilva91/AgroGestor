@@ -29,8 +29,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.login_view, name='login'),
     path('login/ajax/', views.login_ajax, name='login_ajax'),
-    path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
+    path('dashboard/logout/', views.logout_view, name='logout'),
 
 
     re_path(r'^(?P<unused_path>.*)$', catch_all_view),
