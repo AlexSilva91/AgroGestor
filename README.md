@@ -1,6 +1,4 @@
-# AgroGestor
-
-```
+'''
 AgroGestor
 ├─ README.md
 ├─ agrog
@@ -15,7 +13,7 @@ AgroGestor
 │  ├─ apps.py
 │  ├─ migrations
 │  │  ├─ 0001_initial.py
-│  │  ├─ __init__.py
+│  │  └─ __init__.py
 │  ├─ models.py
 │  ├─ tests.py
 │  └─ views.py
@@ -26,7 +24,7 @@ AgroGestor
 │  ├─ migrations
 │  │  ├─ 0001_initial.py
 │  │  ├─ 0002_initial.py
-│  │  ├─ __init__.py
+│  │  └─ __init__.py
 │  ├─ models.py
 │  ├─ tests.py
 │  └─ views.py
@@ -35,41 +33,65 @@ AgroGestor
 │  ├─ admin.py
 │  ├─ apps.py
 │  ├─ migrations
-│  │  ├─ __init__.py
+│  │  └─ __init__.py
 │  ├─ models.py
 │  ├─ tests.py
 │  └─ views.py
 ├─ manage.py
 ├─ pastagem
 │  ├─ __init__.py
-│  ├─ __pycache__
 │  ├─ admin.py
 │  ├─ apps.py
 │  ├─ migrations
 │  │  ├─ 0001_initial.py
 │  │  ├─ 0002_initial.py
-│  │  ├─ __init__.py
+│  │  └─ __init__.py
 │  ├─ models.py
 │  ├─ tests.py
 │  └─ views.py
 ├─ rebanho
 │  ├─ __init__.py
-│  ├─ __pycache__
 │  ├─ admin.py
 │  ├─ apps.py
 │  ├─ migrations
 │  │  ├─ 0001_initial.py
-│  │  ├─ __init__.py
+│  │  └─ __init__.py
 │  ├─ models.py
 │  ├─ tests.py
 │  └─ views.py
 ├─ requirements.txt
 ├─ static
 │  ├─ css
-│  ├─ img
+│  │  ├─ index.css
+│  │  ├─ login.css
+│  │  ├─ main.css
+│  │  └─ usuarios.css
 │  └─ js
-└─ templates
-   ├─ dashboard_admin.html
-   └─ index.html
-
-```
+│     ├─ dashboard.js
+│     ├─ index.js
+│     ├─ login.js
+│     ├─ logout.js
+│     ├─ main.js
+│     └─ models
+│        └─ usuarios.js
+└─templates
+  ├─ base
+  │  ├─ ajuda_content.html
+  │  ├─ configuracoes_content.html
+  │  ├─ dashboard_cards.html
+  │  ├─ dashboard_content.html
+  │  ├─ dashboard_tabs.html
+  │  ├─ footer.html
+  │  ├─ homepage.html
+  │  ├─ index.html
+  │  ├─ navbar.html
+  │  └─ relatorios_content.html
+  ├─ login.html
+  └─ models
+     ├─ animais.html
+     ├─ lancamentos.html
+     ├─ movimentacoes.html
+     ├─ pastagens.html
+     ├─ rebanhos.html
+     └─ usuarios.html
+'''

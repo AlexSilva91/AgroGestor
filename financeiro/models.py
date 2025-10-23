@@ -7,7 +7,7 @@ class LancamentoFinanceiro(models.Model):
     TIPO_CHOICES = [("CUSTO", "Custo"), ("RECEITA", "Receita")]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    farm = models.ForeignKey(Fazenda, on_delete=models.CASCADE)
+    farm = models.ForeignKey(Fazenda, on_delete=models.CASCADE,  null=True, blank=True)
     tipo = models.CharField(max_length=10, choices=TIPO_CHOICES)
     categoria = models.CharField(max_length=50)
     valor = models.DecimalField(max_digits=10, decimal_places=2)

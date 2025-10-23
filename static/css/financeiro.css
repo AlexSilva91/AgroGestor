@@ -1,0 +1,49 @@
+/* Container da paginação */
+#paginacaoLancamentos {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    gap: 5px;
+    font-family: Arial, sans-serif;
+}
+
+/* Botões de paginação */
+#paginacaoLancamentos button {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    box-shadow: var(--shadow);
+}
+
+/* Hover */
+#paginacaoLancamentos button:hover:not(.active):not(:disabled) {
+    background-color: var(--primary-dark);
+    color: #fff;
+}
+
+/* Página ativa */
+#paginacaoLancamentos button.active {
+    background-color: var(--primary);
+    color: #fff;
+    cursor: default;
+    border: 1px solid var(--primary-dark);
+}
+
+/* Botões desabilitados */
+#paginacaoLancamentos button:disabled {
+    background-color: var(--bg-secondary);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    border: 1px solid var(--border-color);
+}
+
+/* Ícones de seta */
+#paginacaoLancamentos button .arrow {
+    font-weight: bold;
+}

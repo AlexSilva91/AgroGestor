@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import include, path, re_path
 from django.contrib import messages
 from django.shortcuts import redirect
 from core import views
@@ -31,6 +31,7 @@ urlpatterns = [
     path('login/ajax/', views.login_ajax, name='login_ajax'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('dashboard/logout/', views.logout_view, name='logout'),
+    path('financeiro/', include('financeiro.urls')),
 
 
     re_path(r'^(?P<unused_path>.*)$', catch_all_view),
