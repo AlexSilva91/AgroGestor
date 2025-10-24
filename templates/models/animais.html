@@ -27,15 +27,16 @@
                     <td>{{ animal.peso_atual }}</td>
                     <td>{{ animal.raca }}</td>
                     <td>
-                        <span class="badge {% if animal.status == 'ativo' %}badge-success{% else %}badge-secondary{% endif %}">
+                        <span
+                            class="badge {% if animal.status == 'ativo' %}badge-success{% else %}badge-secondary{% endif %}">
                             {{ animal.get_status_display }}
                         </span>
                     </td>
                     <td class="actions">
-                        <button class="btn btn-secondary btn-sm" onclick="editarAnimal('{{ animal.id }}')">
+                        <button class="btn btn-secondary btn-sm btn-editar" data-animal-id="{{ animal.id }}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="excluirAnimal('{{ animal.id }}')">
+                        <button class="btn btn-danger btn-sm btn-excluir" data-animal-id="{{ animal.id }}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -61,13 +62,12 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3 id="animalModalTitle">Novo Animal</h3>
-            <button type="button" class="close-btn" onclick="fecharModal('animalModal')">&times;</button>
         </div>
         <div class="modal-body">
             <form id="animalForm" method="POST">
                 {% csrf_token %}
                 <input type="hidden" id="animal_id" name="animal_id">
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="codigo">Código *</label>
@@ -82,7 +82,7 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="data_nascimento">Data de Nascimento *</label>
@@ -93,7 +93,7 @@
                         <input type="number" id="peso_atual" name="peso_atual" step="0.1" min="0" required>
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="raca">Raça *</label>
@@ -109,16 +109,16 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group full-width">
                         <label for="observacoes">Observações</label>
                         <textarea id="observacoes" name="observacoes" rows="3"></textarea>
                     </div>
                 </div>
-                
+
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="fecharModal('animalModal')">Cancelar</button>
+                    <button type="button" class="btn btn-secondary btn-cancelar">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Salvar Animal</button>
                 </div>
             </form>
@@ -131,13 +131,12 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3>Confirmar Exclusão</h3>
-            <button type="button" class="close-btn" onclick="fecharModal('confirmDeleteAnimal')">&times;</button>
         </div>
         <div class="modal-body">
             <p>Tem certeza que deseja excluir este animal? Esta ação não pode ser desfeita.</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="fecharModal('confirmDeleteAnimal')">Cancelar</button>
+            <button type="button" class="btn btn-secondary btn-cancelar">Cancelar</button>
             <button type="button" class="btn btn-danger" id="confirmDeleteAnimalBtn">Excluir</button>
         </div>
     </div>

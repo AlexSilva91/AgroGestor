@@ -32,7 +32,7 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('dashboard/logout/', views.logout_view, name='logout'),
     path('financeiro/', include('financeiro.urls')),
-
+    path('rebanho/', include('rebanho.urls')),  
 
     re_path(r'^(?P<unused_path>.*)$', catch_all_view),
 ]

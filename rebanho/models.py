@@ -15,8 +15,8 @@ class Animal(models.Model):
     SEXO_CHOICES = [("M", "Macho"), ("F", "Fêmea")]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    farm = models.ForeignKey(Fazenda, on_delete=models.CASCADE)
-    rebanho = models.ForeignKey(Rebanho, on_delete=models.CASCADE, related_name="animais")
+    farm = models.ForeignKey(Fazenda, on_delete=models.CASCADE,  null=True, blank=True)
+    rebanho = models.ForeignKey(Rebanho, on_delete=models.CASCADE, related_name="animais",  null=True, blank=True)
     codigo_brincos = models.CharField(max_length=50, unique=True)
     sexo = models.CharField(max_length=1, choices=SEXO_CHOICES)
     nascimento = models.DateField()
