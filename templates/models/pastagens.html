@@ -17,101 +17,52 @@
                 </tr>
             </thead>
             <tbody>
-                {% for pastagem in pastagens %}
-                <tr>
-                    <td>{{ pastagem.nome }}</td>
-                    <td>{{ pastagem.area }}</td>
-                    <td>{{ pastagem.capacidade }} animais</td>
-                    <td>
-                        <span class="badge {% if pastagem.status == 'disponivel' %}badge-success{% else %}badge-secondary{% endif %}">
-                            {{ pastagem.get_status_display }}
-                        </span>
-                    </td>
-                    <td class="actions">
-                        <button class="btn btn-secondary btn-sm" onclick="editarPastagem('{{ pastagem.id }}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="excluirPastagem('{{ pastagem.id }}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">
-                        <div class="empty-state">
-                            <i class="fas fa-seedling fa-3x"></i>
-                            <h3>Nenhuma pastagem encontrada</h3>
-                            <p>Clique no botão "Nova Pastagem" para adicionar o primeiro registro.</p>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
+                <!-- Linhas serão geradas via JS -->
             </tbody>
         </table>
+        <div id="paginacaoPastagens" class="pagination"></div>
     </div>
 </div>
 
-<!-- Modal para Cadastro/Edição de Pastagens -->
+<!-- Modal Cadastro/Edição -->
 <div id="pastagemModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h3 id="pastagemModalTitle">Nova Pastagem</h3>
-            <button type="button" class="close-btn" onclick="fecharModal('pastagemModal')">&times;</button>
         </div>
         <div class="modal-body">
-            <form id="pastagemForm" method="POST">
+            <form id="pastagemForm">
                 {% csrf_token %}
-                <input type="hidden" id="pastagem_id" name="pastagem_id">
-                
+                <input type="hidden" id="pastagem_id">
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="nome">Nome *</label>
-                        <input type="text" id="nome" name="nome" required>
+                        <input type="text" id="nome" required>
                     </div>
                     <div class="form-group">
                         <label for="area">Área (ha) *</label>
-                        <input type="number" id="area" name="area" step="0.1" min="0" required>
+                        <input type="number" id="area" step="0.1" min="0" required>
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="capacidade">Capacidade (animais) *</label>
-                        <input type="number" id="capacidade" name="capacidade" min="1" required>
+                        <input type="number" id="capacidade" min="1" required>
                     </div>
                     <div class="form-group">
                         <label for="status">Status *</label>
-                        <select id="status" name="status" required>
-                            <option value="disponivel">Disponível</option>
-                            <option value="manutencao">Em Manutenção</option>
-                            <option value="indisponivel">Indisponível</option>
+                        <select id="status" required>
+                            <option value="true">Disponível</option>
+                            <option value="false">Indisponível</option>
                         </select>
                     </div>
                 </div>
-                
-                <div class="form-row">
-                    <div class="form-group full-width">
-                        <label for="tipo_pasto">Tipo de Pasto</label>
-                        <select id="tipo_pasto" name="tipo_pasto">
-                            <option value="">Selecione...</option>
-                            <option value="braquiaria">Braquiária</option>
-                            <option value="tifton">Tifton</option>
-                            <option value="coastcross">Coastcross</option>
-                            <option value="outro">Outro</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group full-width">
-                        <label for="observacoes">Observações</label>
-                        <textarea id="observacoes" name="observacoes" rows="3"></textarea>
-                    </div>
-                </div>
-                
+
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="fecharModal('pastagemModal')">Cancelar</button>
+                    <button type="button" class="btn btn-secondary btn-cancelar"
+                        data-modal="pastagemModal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Salvar Pastagem</button>
                 </div>
             </form>
@@ -119,18 +70,18 @@
     </div>
 </div>
 
-<!-- Modal de Confirmação de Exclusão -->
+<!-- Modal Confirmação de Exclusão -->
 <div id="confirmDeletePastagem" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h3>Confirmar Exclusão</h3>
-            <button type="button" class="close-btn" onclick="fecharModal('confirmDeletePastagem')">&times;</button>
         </div>
         <div class="modal-body">
             <p>Tem certeza que deseja excluir esta pastagem? Esta ação não pode ser desfeita.</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="fecharModal('confirmDeletePastagem')">Cancelar</button>
+            <button type="button" class="btn btn-secondary btn-cancelar"
+                data-modal="confirmDeletePastagem">Cancelar</button>
             <button type="button" class="btn btn-danger" id="confirmDeletePastagemBtn">Excluir</button>
         </div>
     </div>
