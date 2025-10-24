@@ -36,14 +36,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const animaisContainer = document.getElementById('animais');
     if (animaisContainer) initializeAnimais();
 
-    // Fechar modais clicando fora ou com ESC
+    // Fechar modais clicando fora do conteúdo
     document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) fecharModal(e.target.id);
+        document.querySelectorAll('.modal.active').forEach(modal => {
+            if (e.target === modal) fecharModal(modal.id);
+        });
     });
 
+    // Fechar modais com ESC
     document.addEventListener('keydown', (e) => {
         if (e.key === "Escape") {
             document.querySelectorAll('.modal.active').forEach(m => fecharModal(m.id));
+        }
+    });
+
+    // Delegação para fechar modais pelos botões Cancelar
+    document.addEventListener('click', (e) => {
+        const btnCancelar = e.target.closest('.btn-cancelar[data-modal]');
+        if (btnCancelar) {
+            fecharModal(btnCancelar.dataset.modal);
         }
     });
 });
@@ -52,33 +63,6 @@ let animalAtualId = null;
 let animaisCache = [];
 let animaisPaginaAtual = 1;
 const animaisPorPagina = 15;
-
-function initializeAnimais() {
-    carregarAnimais();
-
-    document.getElementById('addAnimal')?.addEventListener('click', abrirModalNovoAnimal);
-    document.getElementById('animalForm')?.addEventListener('submit', salvarAnimal);
-    document.getElementById('confirmDeleteAnimalBtn')?.addEventListener('click', confirmarExclusaoAnimal);
-
-    // Delegação de eventos para editar/excluir
-    const tbody = document.querySelector('#animaisTable tbody');
-    if (tbody) {
-        tbody.addEventListener('click', (e) => {
-            const editarBtn = e.target.closest('.btn-editar');
-            const excluirBtn = e.target.closest('.btn-excluir');
-            if (editarBtn) editarAnimal(editarBtn.dataset.animalId);
-            if (excluirBtn) solicitarExclusaoAnimal(excluirBtn.dataset.animalId);
-        });
-    }
-
-    // Fechar modais pelo X ou Cancelar
-    document.querySelectorAll('.modal .close-btn, .modal .btn-cancelar').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const modal = btn.closest('.modal');
-            if (modal) fecharModal(modal.id);
-        });
-    });
-}
 
 // =======================
 // MODAIS
@@ -100,6 +84,28 @@ function fecharModal(modalId) {
     if (modalId === 'animalModal') {
         document.getElementById('animalForm')?.reset();
         animalAtualId = null;
+    }
+}
+
+// =======================
+// INICIALIZAÇÃO CRUD
+// =======================
+function initializeAnimais() {
+    carregarAnimais();
+
+    document.getElementById('addAnimal')?.addEventListener('click', abrirModalNovoAnimal);
+    document.getElementById('animalForm')?.addEventListener('submit', salvarAnimal);
+    document.getElementById('confirmDeleteAnimalBtn')?.addEventListener('click', confirmarExclusaoAnimal);
+
+    // Delegação de eventos para editar/excluir
+    const tbody = document.querySelector('#animaisTable tbody');
+    if (tbody) {
+        tbody.addEventListener('click', (e) => {
+            const editarBtn = e.target.closest('.btn-editar');
+            const excluirBtn = e.target.closest('.btn-excluir');
+            if (editarBtn) editarAnimal(editarBtn.dataset.animalId);
+            if (excluirBtn) solicitarExclusaoAnimal(excluirBtn.dataset.animalId);
+        });
     }
 }
 
