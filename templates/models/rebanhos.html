@@ -21,15 +21,16 @@
                     <td>{{ rebanho.nome }}</td>
                     <td>{{ rebanho.capacidade }} animais</td>
                     <td>
-                        <span class="badge {% if rebanho.status == 'ativo' %}badge-success{% else %}badge-secondary{% endif %}">
+                        <span
+                            class="badge {% if rebanho.status == 'ativo' %}badge-success{% else %}badge-secondary{% endif %}">
                             {{ rebanho.get_status_display }}
                         </span>
                     </td>
                     <td class="actions">
-                        <button class="btn btn-secondary btn-sm" onclick="editarRebanho('{{ rebanho.id }}')">
+                        <button class="btn btn-secondary btn-sm btn-editar" data-rebanho-id="{{ rebanho.id }}">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="excluirRebanho('{{ rebanho.id }}')">
+                        <button class="btn btn-danger btn-sm btn-excluir" data-rebanho-id="{{ rebanho.id }}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
@@ -50,18 +51,17 @@
     </div>
 </div>
 
-<!-- Modal para Cadastro/Edição de Rebanhos -->
+<!-- Modal Cadastro/Edição Rebanhos -->
 <div id="rebanhoModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h3 id="rebanhoModalTitle">Novo Rebanho</h3>
-            <button type="button" class="close-btn" onclick="fecharModal('rebanhoModal')">&times;</button>
         </div>
         <div class="modal-body">
             <form id="rebanhoForm" method="POST">
                 {% csrf_token %}
                 <input type="hidden" id="rebanho_id" name="rebanho_id">
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="nome">Nome *</label>
@@ -72,7 +72,7 @@
                         <input type="number" id="capacidade" name="capacidade" min="1" required>
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="status">Status *</label>
@@ -91,16 +91,17 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group full-width">
                         <label for="descricao">Descrição</label>
                         <textarea id="descricao" name="descricao" rows="3"></textarea>
                     </div>
                 </div>
-                
+
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="fecharModal('rebanhoModal')">Cancelar</button>
+                    <button type="button" class="btn btn-secondary btn-cancelar"
+                        data-modal="rebanhoModal">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Salvar Rebanho</button>
                 </div>
             </form>
@@ -108,18 +109,18 @@
     </div>
 </div>
 
-<!-- Modal de Confirmação de Exclusão -->
+<!-- Modal Confirmação Exclusão -->
 <div id="confirmDeleteRebanho" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h3>Confirmar Exclusão</h3>
-            <button type="button" class="close-btn" onclick="fecharModal('confirmDeleteRebanho')">&times;</button>
         </div>
         <div class="modal-body">
             <p>Tem certeza que deseja excluir este rebanho? Esta ação não pode ser desfeita.</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="fecharModal('confirmDeleteRebanho')">Cancelar</button>
+            <button type="button" class="btn btn-secondary btn-cancelar"
+                data-modal="confirmDeleteRebanho">Cancelar</button>
             <button type="button" class="btn btn-danger" id="confirmDeleteRebanhoBtn">Excluir</button>
         </div>
     </div>

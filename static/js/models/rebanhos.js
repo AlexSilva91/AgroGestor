@@ -30,31 +30,41 @@ function mostrarMensagem(msg, tipo = 'info') {
 }
 
 // =======================
+// VARIÁVEIS GLOBAIS
+// =======================
+let rebanhosCache = [];
+let rebanhoAtualId = null;
+let rebanhosPaginaAtual = 1;
+const rebanhosPorPagina = 10;
+
+// =======================
 // INICIALIZAÇÃO
 // =======================
-document.addEventListener('DOMContentLoaded', function () {
-    const rebanhosContainer = document.getElementById('rebanhos');
-    if (rebanhosContainer) initializeRebanhos();
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('rebanhos')) {
+        initializeRebanhos();
+    }
 
     // Fechar modais clicando fora do conteúdo
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
         document.querySelectorAll('.modal.active').forEach(modal => {
             if (e.target === modal) fecharModal(modal.id);
         });
     });
 
     // Fechar modais com ESC
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
         if (e.key === "Escape") {
-            document.querySelectorAll('.modal.active').forEach(m => fecharModal(m.id));
+            document.querySelectorAll('.modal.active').forEach(modal => fecharModal(modal.id));
         }
     });
-});
 
-let rebanhoAtualId = null;
-let rebanhosCache = [];
-let rebanhosPaginaAtual = 1;
-const rebanhosPorPagina = 10;
+    // Fechar modais via botão cancelar
+    document.addEventListener('click', e => {
+        const btnCancelar = e.target.closest('.btn-cancelar[data-modal]');
+        if (btnCancelar) fecharModal(btnCancelar.dataset.modal);
+    });
+});
 
 // =======================
 // MODAIS
@@ -85,44 +95,52 @@ function fecharModal(modalId) {
 function initializeRebanhos() {
     carregarRebanhos();
 
-    document.getElementById('addRebanho')?.addEventListener('click', abrirModalNovoRebanho);
+    document.getElementById('addRebanho')?.addEventListener('click', () => {
+        rebanhoAtualId = null;
+        document.getElementById('rebanhoModalTitle').textContent = 'Novo Rebanho';
+        document.getElementById('rebanhoForm')?.reset();
+        abrirModal('rebanhoModal');
+    });
+
     document.getElementById('rebanhoForm')?.addEventListener('submit', salvarRebanho);
+
+    // Delegação para editar/excluir
+    document.querySelector('#rebanhosTable tbody')?.addEventListener('click', e => {
+        const btnEditar = e.target.closest('.btn-editar');
+        const btnExcluir = e.target.closest('.btn-excluir');
+        if (btnEditar) editarRebanho(btnEditar.dataset.rebanhoId);
+        if (btnExcluir) solicitarExclusaoRebanho(btnExcluir.dataset.rebanhoId);
+    });
+
     document.getElementById('confirmDeleteRebanhoBtn')?.addEventListener('click', confirmarExclusaoRebanho);
 }
 
 // =======================
 // CRUD
 // =======================
-function abrirModalNovoRebanho() {
-    rebanhoAtualId = null;
-    document.getElementById('rebanhoModalTitle').textContent = 'Novo Rebanho';
-    document.getElementById('rebanhoForm')?.reset();
-    abrirModal('rebanhoModal');
-}
-
 async function editarRebanho(id) {
     try {
         const res = await fetch(`/rebanho/rebanhos/${id}/`);
         if (!res.ok) throw new Error('Erro ao carregar dados do rebanho');
-        const rebanho = await res.json();
+        const r = await res.json();
 
-        document.getElementById('rebanho_id').value = rebanho.id;
-        document.getElementById('nome').value = rebanho.nome_lote || '';
-        document.getElementById('capacidade').value = rebanho.capacidade || '';
-        document.getElementById('status').value = rebanho.ativo ? 'ativo' : 'inativo';
-        document.getElementById('pastagem').value = rebanho.pastagem_id || '';
-        document.getElementById('descricao').value = rebanho.descricao || '';
+        document.getElementById('rebanho_id').value = r.id;
+        document.getElementById('nome').value = r.nome_lote || '';
+        document.getElementById('capacidade').value = r.capacidade || '';
+        document.getElementById('status').value = r.ativo ? 'ativo' : 'inativo';
+        document.getElementById('pastagem').value = r.pastagem_id || '';
+        document.getElementById('descricao').value = r.descricao || '';
 
         rebanhoAtualId = id;
         document.getElementById('rebanhoModalTitle').textContent = 'Editar Rebanho';
         abrirModal('rebanhoModal');
     } catch (err) {
         console.error(err);
-        mostrarMensagem('Erro ao carregar dados do rebanho', 'error');
+        mostrarMensagem('Erro ao carregar rebanho', 'error');
     }
 }
 
-function excluirRebanho(id) {
+function solicitarExclusaoRebanho(id) {
     rebanhoAtualId = id;
     abrirModal('confirmDeleteRebanho');
 }
@@ -135,7 +153,6 @@ async function confirmarExclusaoRebanho() {
             headers: { 'X-CSRFToken': getCSRFToken() }
         });
         const data = await res.json();
-
         if (data.success) {
             fecharModal('confirmDeleteRebanho');
             mostrarMensagem('Rebanho excluído com sucesso', 'success');
@@ -151,8 +168,8 @@ async function confirmarExclusaoRebanho() {
 
 async function salvarRebanho(e) {
     e.preventDefault();
-
     const form = document.getElementById('rebanhoForm');
+
     const dados = {
         nome_lote: form.nome.value.trim(),
         capacidade: parseInt(form.capacidade.value),
@@ -168,14 +185,13 @@ async function salvarRebanho(e) {
         const method = rebanhoAtualId ? 'PUT' : 'POST';
 
         const res = await fetch(url, {
-            method: method,
+            method,
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCSRFToken()
             },
             body: JSON.stringify(dados)
         });
-
         const result = await res.json();
 
         if (result.success) {
@@ -192,22 +208,19 @@ async function salvarRebanho(e) {
 }
 
 // =======================
-// LISTAR E PAGINAÇÃO
+// LISTAGEM E PAGINAÇÃO
 // =======================
 async function carregarRebanhos(pagina = 1) {
     try {
         const res = await fetch('/rebanho/rebanhos/');
         if (!res.ok) throw new Error('Erro ao carregar rebanhos');
-        const rebanhos = await res.json();
-
-        rebanhosCache = rebanhos;
+        rebanhosCache = await res.json();
         rebanhosPaginaAtual = pagina;
 
         const start = (pagina - 1) * rebanhosPorPagina;
         const end = pagina * rebanhosPorPagina;
-
-        renderizarTabelaRebanhos(rebanhos.slice(start, end));
-        renderizarPaginacaoRebanhos(rebanhos.length, pagina);
+        renderizarTabelaRebanhos(rebanhosCache.slice(start, end));
+        renderizarPaginacao(rebanhosCache.length, pagina);
     } catch (err) {
         console.error(err);
         mostrarMensagem('Erro ao carregar rebanhos', 'error');
@@ -239,10 +252,10 @@ function renderizarTabelaRebanhos(rebanhos) {
             <td>${r.capacidade} animais</td>
             <td><span class="badge ${r.ativo ? 'badge-success' : 'badge-secondary'}">${r.ativo ? 'Ativo' : 'Inativo'}</span></td>
             <td>
-                <button class="btn btn-secondary btn-sm" onclick="editarRebanho('${r.id}')">
+                <button class="btn btn-secondary btn-sm btn-editar" data-rebanho-id="${r.id}">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="btn btn-danger btn-sm" onclick="excluirRebanho('${r.id}')">
+                <button class="btn btn-danger btn-sm btn-excluir" data-rebanho-id="${r.id}">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
@@ -250,11 +263,10 @@ function renderizarTabelaRebanhos(rebanhos) {
     `).join('');
 }
 
-function renderizarPaginacaoRebanhos(totalItems, paginaAtual) {
+function renderizarPaginacao(totalItems, paginaAtual) {
     const totalPaginas = Math.ceil(totalItems / rebanhosPorPagina);
     const paginacaoContainer = document.getElementById('paginacaoRebanhos');
     if (!paginacaoContainer) return;
-
     if (totalPaginas <= 1) {
         paginacaoContainer.innerHTML = '';
         return;
@@ -263,26 +275,13 @@ function renderizarPaginacaoRebanhos(totalItems, paginaAtual) {
     const maxBtn = 5;
     let startPage = Math.max(1, paginaAtual - Math.floor(maxBtn / 2));
     let endPage = Math.min(totalPaginas, startPage + maxBtn - 1);
+    if (endPage - startPage + 1 < maxBtn) startPage = Math.max(1, endPage - maxBtn + 1);
 
-    if (endPage - startPage + 1 < maxBtn) {
-        startPage = Math.max(1, endPage - maxBtn + 1);
-    }
-
-    let html = `
-        <button class="page-btn" data-page="${paginaAtual - 1}" ${paginaAtual === 1 ? 'disabled' : ''}>
-            &laquo;
-        </button>
-    `;
-
+    let html = `<button class="page-btn" data-page="${paginaAtual - 1}" ${paginaAtual === 1 ? 'disabled' : ''}>&laquo;</button>`;
     for (let i = startPage; i <= endPage; i++) {
         html += `<button class="page-btn ${i === paginaAtual ? 'active' : ''}" data-page="${i}">${i}</button>`;
     }
-
-    html += `
-        <button class="page-btn" data-page="${paginaAtual + 1}" ${paginaAtual === totalPaginas ? 'disabled' : ''}>
-            &raquo;
-        </button>
-    `;
+    html += `<button class="page-btn" data-page="${paginaAtual + 1}" ${paginaAtual === totalPaginas ? 'disabled' : ''}>&raquo;</button>`;
 
     paginacaoContainer.innerHTML = html;
     paginacaoContainer.querySelectorAll('.page-btn').forEach(btn => {
