@@ -20,7 +20,7 @@ def listar_rebanhos(request):
     data = [
         {
             "id": str(r.id),
-            "farm_id": r.farm.id,
+            "farm_id": getattr(r.farm, 'id', None),
             "nome_lote": r.nome_lote,
             "capacidade": r.capacidade,
             "ativo": r.ativo,
@@ -29,7 +29,6 @@ def listar_rebanhos(request):
         for r in rebanhos
     ]
     return JsonResponse(data, safe=False)
-
 
 @login_required
 @require_http_methods(["GET"])

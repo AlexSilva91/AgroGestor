@@ -4,7 +4,7 @@ import uuid
 
 class Rebanho(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    farm = models.ForeignKey(Fazenda, on_delete=models.CASCADE)
+    farm = models.ForeignKey(Fazenda, on_delete=models.CASCADE, null=True, blank=True)
     nome_lote = models.CharField(max_length=100)
     capacidade = models.IntegerField(null=True, blank=True)
     ativo = models.BooleanField(default=True)

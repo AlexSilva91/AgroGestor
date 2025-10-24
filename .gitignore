@@ -1,3 +1,38 @@
-# Python
-*.pyc
+# Ignorar todas as pastas migrations em qualquer app
+**/migrations/
+
+# Ignorar arquivos compilados Python
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Ambiente virtual
+venv/
+env/
+.venv/
+ENV/
+
+# Pytest cache
+.pytest_cache/
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos estáticos coletados
+staticfiles/
+media/
+
+# Logs
+*.log
+
+# Coverage
+htmlcov/
+.coverage
+
+# Mac / Linux swap files
+*.swp
