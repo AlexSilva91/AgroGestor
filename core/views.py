@@ -10,6 +10,9 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 import json
 
+from pastagem.models import Pastagem
+from rebanho.models import Animal, Rebanho
+
 def login_view(request):
     """Renderiza a página de login na rota raiz"""
     if request.user.is_authenticated:
@@ -86,6 +89,9 @@ def dashboard(request):
     
     context = {
         'usuarios': usuarios,
+        'rebanhos': Rebanho.objects.filter(ativo=True),
+        'animais': Animal.objects.all().order_by('codigo_brincos'),
+        'pastagens': Pastagem.objects.filter(ativo=True).order_by('nome'),
     }
     return render(request, 'base/dashboard_content.html', context)
 

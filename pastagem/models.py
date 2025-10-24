@@ -20,3 +20,4 @@ class MovimentacaoAnimal(models.Model):
     data_entrada = models.DateField(auto_now_add=True)
     data_saida = models.DateField(null=True, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
+    observacoes = models.TextField(blank=True, null=True) 

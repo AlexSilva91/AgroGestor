@@ -17,56 +17,31 @@
                 </tr>
             </thead>
             <tbody>
-                {% for movimentacao in movimentacoes %}
-                <tr>
-                    <td>{{ movimentacao.animal.codigo }}</td>
-                    <td>{{ movimentacao.pastagem.nome }}</td>
-                    <td>{{ movimentacao.data_entrada|date:"d/m/Y" }}</td>
-                    <td>{{ movimentacao.data_saida|date:"d/m/Y"|default:"-" }}</td>
-                    <td class="actions">
-                        <button class="btn btn-secondary btn-sm" onclick="editarMovimentacao('{{ movimentacao.id }}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="excluirMovimentacao('{{ movimentacao.id }}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">
-                        <div class="empty-state">
-                            <i class="fas fa-exchange-alt fa-3x"></i>
-                            <h3>Nenhuma movimentação encontrada</h3>
-                            <p>Clique no botão "Nova Movimentação" para adicionar o primeiro registro.</p>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
+                <!-- Linhas serão renderizadas via JS -->
             </tbody>
         </table>
+        <div id="paginacaoMovimentacoes" class="pagination"></div>
     </div>
 </div>
 
-<!-- Modal para Cadastro/Edição de Movimentações -->
+<!-- Modal Cadastro/Edição -->
 <div id="movimentacaoModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h3 id="movimentacaoModalTitle">Nova Movimentação</h3>
-            <button type="button" class="close-btn" onclick="fecharModal('movimentacaoModal')">&times;</button>
         </div>
         <div class="modal-body">
             <form id="movimentacaoForm" method="POST">
                 {% csrf_token %}
-                <input type="hidden" id="movimentacao_id" name="movimentacao_id">
-                
+                <input type="hidden" id="movimentacao_id">
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="animal">Animal *</label>
                         <select id="animal" name="animal" required>
                             <option value="">Selecione um animal...</option>
                             {% for animal in animais %}
-                            <option value="{{ animal.id }}">{{ animal.codigo }}</option>
+                            <option value="{{ animal.id }}">{{ animal.codigo_brincos }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -80,7 +55,7 @@
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group">
                         <label for="data_entrada">Data de Entrada *</label>
@@ -91,35 +66,36 @@
                         <input type="date" id="data_saida" name="data_saida">
                     </div>
                 </div>
-                
+
                 <div class="form-row">
                     <div class="form-group full-width">
                         <label for="observacoes">Observações</label>
                         <textarea id="observacoes" name="observacoes" rows="3"></textarea>
                     </div>
                 </div>
-                
+
                 <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="fecharModal('movimentacaoModal')">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar Movimentação</button>
+                    <button type="button" class="btn btn-secondary btn-cancelar"
+                        data-modal="movimentacaoModal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal de Confirmação de Exclusão -->
+<!-- Modal Exclusão -->
 <div id="confirmDeleteMovimentacao" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h3>Confirmar Exclusão</h3>
-            <button type="button" class="close-btn" onclick="fecharModal('confirmDeleteMovimentacao')">&times;</button>
         </div>
         <div class="modal-body">
-            <p>Tem certeza que deseja excluir esta movimentação? Esta ação não pode ser desfeita.</p>
+            <p>Tem certeza que deseja excluir esta movimentação?</p>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="fecharModal('confirmDeleteMovimentacao')">Cancelar</button>
+            <button type="button" class="btn btn-secondary btn-cancelar"
+                data-modal="confirmDeleteMovimentacao">Cancelar</button>
             <button type="button" class="btn btn-danger" id="confirmDeleteMovimentacaoBtn">Excluir</button>
         </div>
     </div>

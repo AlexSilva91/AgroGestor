@@ -104,15 +104,17 @@ def listar_movimentacoes(request):
         {
             "id": str(m.id),
             "animal_id": getattr(m.animal, 'id', None),
+            "animal_codigo": getattr(m.animal, 'codigo_brincos', 'N/A'),
             "pastagem_id": getattr(m.pastagem, 'id', None),
-            "data_entrada": m.data_entrada.strftime("%Y-%m-%d") if m.data_entrada else None,
-            "data_saida": m.data_saida.strftime("%Y-%m-%d") if m.data_saida else None,
-            "criado_em": m.criado_em.strftime("%Y-%m-%d %H:%M"),
+            "pastagem_nome": getattr(m.pastagem, 'nome', 'N/A'), 
+            "data_entrada": m.data_entrada.strftime("%d/%m/%Y") if m.data_entrada else None,
+            "data_saida": m.data_saida.strftime("%d/%m/%Y") if m.data_saida else None,
+            "observacoes": m.observacoes, 
+            "criado_em": m.criado_em.strftime("%d/%m/%Y %H:%M"),
         }
         for m in movs
     ]
     return JsonResponse(data, safe=False)
-
 
 @login_required
 @require_http_methods(["GET"])

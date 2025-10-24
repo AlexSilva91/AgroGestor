@@ -256,3 +256,34 @@ function getCSRFToken() {
     const token = document.querySelector('[name=csrfmiddlewaretoken]');
     return token ? token.value : '';
 }
+
+// =======================
+// FUNÇÃO TOAST
+// =======================
+function mostrarMensagem(msg, tipo = 'info') {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed; top: 20px; right: 20px;
+        background: ${tipo === 'success' ? '#28a745' : tipo === 'error' ? '#dc3545' : '#17a2b8'};
+        color: white; padding: 12px 20px; border-radius: 4px;
+        z-index:10000; box-shadow:0 4px 6px rgba(0,0,0,0.1);
+        max-width: 300px; font-family: Arial, sans-serif;
+        opacity: 0; transform: translateY(-20px);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    `;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    });
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        toast.addEventListener('transitionend', () => {
+            if (toast.parentNode) document.body.removeChild(toast);
+        });
+    }, 4000);
+}
