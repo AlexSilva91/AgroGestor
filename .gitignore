@@ -1,7 +1,8 @@
-# Ignorar todas as pastas migrations em qualquer app
+# Ignorar todas as pastas migrations e seus arquivos, exceto __init__.py
 **/migrations/
+!**/migrations/__init__.py
 
-# Ignorar arquivos compilados Python
+# Ignorar cache do Python
 __pycache__/
 *.py[cod]
 *$py.class
@@ -13,27 +14,25 @@ env/
 ENV/
 .env
 
-# Pytest cache
-.pytest_cache/
-
-# VSCode / IDE
+# IDE / editor
 .vscode/
 .idea/
 
-# Arquivos de sistema
-.DS_Store
-Thumbs.db
-
-# Arquivos estáticos coletados
+# Arquivos estáticos coletados e mídia
 staticfiles/
 media/
 
 # Logs
 *.log
 
-# Coverage
+# Pytest cache
+.pytest_cache/
+
+# Cobertura de testes
 htmlcov/
 .coverage
 
-# Mac / Linux swap files
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
 *.swp

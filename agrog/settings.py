@@ -87,18 +87,15 @@ WSGI_APPLICATION = 'agrog.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "agrogestor",
-        "USER": "root", 
-        "PASSWORD": "842695",
-        "HOST": "localhost",
-        "PORT": "3306",
-        "OPTIONS": {
-            'init_command': "SET default_storage_engine=INNODB",
-            'charset': 'utf8mb4',
-        }
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "agrogestor",        # nome do banco PostgreSQL
+        "USER": "ourinet",          # usuário do PostgreSQL
+        "PASSWORD": "mk20ur1cli",        # senha do usuário
+        "HOST": "localhost",         # servidor do banco
+        "PORT": "5432",              # porta padrão do PostgreSQL
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
