@@ -124,6 +124,7 @@ function setNavTheme(key) {
         usuarios: 'usuarios',
         relatorios: 'relatorios',
         configuracoes: 'configuracoes',
+        cadastros: 'cadastros',
         ajuda: 'ajuda',
         Sair: 'sair'
     };

@@ -8,11 +8,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
+from django.forms.models import model_to_dict
 from django.db.models import Count, Sum
 from django.db import transaction
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.utils.dateparse import parse_date, parse_datetime
 from django.views.decorators.http import require_http_methods
 
 from core.audit import registrar_acao
@@ -34,7 +36,8 @@ from core.permissions import (
     user_is_super_admin,
 )
 from pastagem.models import Pastagem
-from rebanho.models import Animal, Rebanho
+from pastagem.models import MovimentacaoAnimal
+from rebanho.models import Animal, HistoricoAnimal, Rebanho
 
 
 INTERFACE_MODULES = [
@@ -75,6 +78,49 @@ MODULOS_BASE = {
     "rebanho": ("Rebanho", "Controle de rebanhos e animais."),
     "pastagem": ("Pastagem", "Pastos e movimentações em áreas de pastejo."),
     "iot": ("IoT", "Sensores e automações."),
+}
+
+CRUD_ENTITIES = {
+    "fazendas": {"model": Fazenda, "label": "Fazendas", "module": "usuarios", "farm_field": None, "fields": ["nome", "localizacao", "ramo_atuacao", "responsavel"]},
+    "usuarios": {"model": get_user_model(), "label": "Usuários", "module": "usuarios", "farm_field": "farm", "fields": ["username", "email", "first_name", "last_name", "role", "farm", "is_active", "is_staff", "password"]},
+    "fazenda-acessos": {"model": FazendaAcesso, "label": "Acessos por Fazenda", "module": "usuarios", "farm_field": "farm", "fields": ["farm", "usuario", "perfil", "ativo", "can_manage_users"]},
+    "modulos": {"model": ModuloSistema, "label": "Módulos do Sistema", "module": "usuarios", "farm_field": None, "fields": ["codigo", "nome", "descricao", "ativo"]},
+    "fazenda-modulos": {"model": FazendaModulo, "label": "Módulos por Fazenda", "module": "usuarios", "farm_field": "farm", "fields": ["farm", "modulo", "liberado"]},
+    "backups": {"model": BackupConfig, "label": "Configurações de Backup", "module": "usuarios", "farm_field": "farm", "fields": ["farm", "ativo", "frequencia", "hora_execucao", "destino", "manter_ultimos"]},
+    "logs": {"model": LogAcao, "label": "Logs de Auditoria", "module": "usuarios", "farm_field": "farm", "fields": ["farm", "usuario", "acao", "tabela_afetada", "registro_id", "descricao", "metodo", "caminho", "status_code"]},
+    "rebanhos": {"model": Rebanho, "label": "Rebanhos", "module": "rebanho", "farm_field": "farm", "fields": ["farm", "nome_lote", "capacidade", "ativo"]},
+    "animais-legado": {"model": Animal, "label": "Animais", "module": "rebanho", "farm_field": "farm", "fields": ["farm", "rebanho", "codigo_brincos", "sexo", "nascimento", "peso_atual", "raca", "status"]},
+    "historicos-animais": {"model": HistoricoAnimal, "label": "Histórico Animal", "module": "rebanho", "farm_field": "farm", "fields": ["farm", "animal", "tipo_evento", "valor", "descricao", "data_evento"]},
+    "pastagens": {"model": Pastagem, "label": "Pastagens", "module": "pastagem", "farm_field": "farm", "fields": ["farm", "nome", "area", "capacidade_suporte", "ativo"]},
+    "movimentacoes-pastagem": {"model": MovimentacaoAnimal, "label": "Movimentações de Pastagem", "module": "pastagem", "farm_field": "animal__farm", "fields": ["animal", "pastagem", "data_entrada", "data_saida", "observacoes"]},
+    "lancamentos": {"model": LancamentoFinanceiro, "label": "Lançamentos Financeiros", "module": "financeiro", "farm_field": "farm", "fields": ["farm", "tipo", "categoria", "valor", "descricao", "data_movimento", "animal", "plantel"]},
+    "culturas": {"model": gestao_models.Cultura, "label": "Culturas", "module": "gestao", "farm_field": None, "fields": ["codigo", "nome", "descricao", "ativo"]},
+    "especies": {"model": gestao_models.Especie, "label": "Espécies", "module": "gestao", "farm_field": None, "fields": ["cultura", "nome", "nome_cientifico", "ativo"]},
+    "finalidades": {"model": gestao_models.FinalidadeProdutiva, "label": "Finalidades Produtivas", "module": "gestao", "farm_field": None, "fields": ["cultura", "nome", "descricao", "ativo"]},
+    "instalacoes": {"model": gestao_models.Instalacao, "label": "Instalações", "module": "gestao", "farm_field": "farm", "fields": ["farm", "cultura", "nome", "tipo", "area_m2", "capacidade_informada", "ativo", "observacoes"]},
+    "regras-capacidade": {"model": gestao_models.RegraCapacidade, "label": "Regras de Capacidade", "module": "gestao", "farm_field": None, "fields": ["cultura", "finalidade", "fase", "animais_por_m2", "area_minima_por_animal_m2", "comedouros_por_animal", "bebedouros_por_animal", "observacoes", "ativo"]},
+    "planteis": {"model": gestao_models.Plantel, "label": "Plantéis", "module": "gestao", "farm_field": "farm", "fields": ["farm", "cultura", "especie", "finalidade", "instalacao", "codigo", "nome", "data_alojamento", "quantidade_inicial", "quantidade_atual", "idade_inicial_dias", "peso_medio_inicial", "status", "origem", "observacoes"]},
+    "animais-individuais": {"model": gestao_models.AnimalIndividual, "label": "Animais Individuais", "module": "gestao", "farm_field": "farm", "fields": ["farm", "plantel", "codigo", "sexo", "nascimento", "peso_atual", "status", "observacoes"]},
+    "movimentacoes-plantel": {"model": gestao_models.MovimentacaoPlantel, "label": "Movimentações de Plantel", "module": "gestao", "farm_field": "farm", "fields": ["farm", "plantel", "tipo", "origem", "destino", "quantidade", "data_movimento", "motivo", "observacoes"]},
+    "protocolos": {"model": gestao_models.ProtocoloManejo, "label": "Protocolos de Manejo", "module": "manejo", "farm_field": None, "fields": ["cultura", "finalidade", "nome", "descricao", "ativo"]},
+    "etapas-manejo": {"model": gestao_models.EtapaManejo, "label": "Etapas de Manejo", "module": "manejo", "farm_field": None, "fields": ["protocolo", "nome", "semana_inicio", "semana_fim", "objetivo", "ordem"]},
+    "tarefas-manejo": {"model": gestao_models.TarefaManejo, "label": "Tarefas de Manejo", "module": "manejo", "farm_field": None, "fields": ["etapa", "tipo", "titulo", "descricao", "semana", "dia_da_semana", "obrigatoria"]},
+    "agendas": {"model": gestao_models.AgendaManejo, "label": "Agenda de Manejo", "module": "manejo", "farm_field": "farm", "fields": ["farm", "plantel", "tarefa", "data_prevista", "status", "observacoes"]},
+    "execucoes-manejo": {"model": gestao_models.ExecucaoManejo, "label": "Execuções de Manejo", "module": "manejo", "farm_field": "agenda__farm", "fields": ["agenda", "executado_em", "executado_por", "resultado", "observacoes"]},
+    "ingredientes": {"model": gestao_models.Ingrediente, "label": "Ingredientes", "module": "nutricao", "farm_field": "farm", "fields": ["farm", "nome", "unidade", "custo_unitario", "ativo"]},
+    "formulas-racao": {"model": gestao_models.FormulaRacao, "label": "Fórmulas de Ração", "module": "nutricao", "farm_field": "farm", "fields": ["farm", "cultura", "finalidade", "nome", "fase", "objetivo", "ativo"]},
+    "formula-itens": {"model": gestao_models.FormulaRacaoItem, "label": "Itens de Fórmula", "module": "nutricao", "farm_field": "formula__farm", "fields": ["formula", "ingrediente", "percentual", "observacoes"]},
+    "ordens-racao": {"model": gestao_models.OrdemFabricacaoRacao, "label": "Ordens de Ração", "module": "nutricao", "farm_field": "farm", "fields": ["farm", "formula", "quantidade_kg", "custo_total", "data_fabricacao", "validade", "status", "observacoes"]},
+    "estoque": {"model": gestao_models.MovimentoEstoque, "label": "Movimento de Estoque", "module": "nutricao", "farm_field": "farm", "fields": ["farm", "ingrediente", "ordem_racao", "tipo", "quantidade", "data_movimento", "custo_unitario", "observacoes"]},
+    "consumos-racao": {"model": gestao_models.ConsumoRacao, "label": "Consumos de Ração", "module": "nutricao", "farm_field": "farm", "fields": ["farm", "plantel", "formula", "quantidade_kg", "data_consumo", "observacoes"]},
+    "ocorrencias-sanitarias": {"model": gestao_models.OcorrenciaSanitaria, "label": "Ocorrências Sanitárias", "module": "sanidade", "farm_field": "farm", "fields": ["farm", "plantel", "animal", "data_ocorrencia", "sintomas", "diagnostico", "severidade", "status", "observacoes"]},
+    "isolamentos": {"model": gestao_models.IsolamentoSanitario, "label": "Isolamentos Sanitários", "module": "sanidade", "farm_field": "farm", "fields": ["farm", "ocorrencia", "plantel", "animal", "origem", "enfermaria", "data_entrada", "data_saida", "motivo", "ativo"]},
+    "tratamentos": {"model": gestao_models.TratamentoSanitario, "label": "Tratamentos Sanitários", "module": "sanidade", "farm_field": "ocorrencia__farm", "fields": ["ocorrencia", "medicamento", "dose", "via_aplicacao", "frequencia", "dias_tratamento", "carencia_dias", "observacoes"]},
+    "calendario-tratamento": {"model": gestao_models.CalendarioTratamento, "label": "Calendário de Tratamento", "module": "sanidade", "farm_field": "tratamento__ocorrencia__farm", "fields": ["tratamento", "data_prevista", "data_aplicacao", "status", "observacoes"]},
+    "altas-sanitarias": {"model": gestao_models.AltaSanitaria, "label": "Altas Sanitárias", "module": "sanidade", "farm_field": "ocorrencia__farm", "fields": ["ocorrencia", "data_alta", "destino", "observacoes"]},
+    "pesagens": {"model": gestao_models.PesagemPlantel, "label": "Pesagens", "module": "producao", "farm_field": "farm", "fields": ["farm", "plantel", "data_pesagem", "quantidade_amostrada", "peso_medio", "observacoes"]},
+    "producao-ovos": {"model": gestao_models.ProducaoOvos, "label": "Produção de Ovos", "module": "producao", "farm_field": "farm", "fields": ["farm", "plantel", "data_producao", "ovos_total", "ovos_comerciais", "ovos_descartados", "ovos_trincados", "observacoes"]},
+    "producao-corte": {"model": gestao_models.ProducaoCorte, "label": "Produção de Corte", "module": "producao", "farm_field": "farm", "fields": ["farm", "plantel", "data_registro", "peso_medio", "ganho_peso_dia", "conversao_alimentar", "mortalidade_periodo", "observacoes"]},
 }
 
 
@@ -624,6 +670,196 @@ def _request_form_data(request):
     if request.method == "POST":
         return request.POST
     return QueryDict(request.body)
+
+
+def _crud_config(entity):
+    if entity not in CRUD_ENTITIES:
+        raise ValidationError("Entidade não encontrada.")
+    return CRUD_ENTITIES[entity]
+
+
+def _crud_can_global(user):
+    return user_is_super_admin(user)
+
+
+def _crud_queryset(config, request, action="view"):
+    model = config["model"]
+    farm_field = config.get("farm_field")
+    if farm_field is None:
+        if not _crud_can_global(request.user):
+            raise PermissionDenied("Apenas o super admin pode acessar esta entidade.")
+        return model.objects.all()
+    queryset = module_queryset(model.objects.all(), request.user, config["module"], action=action, farm_field=farm_field)
+    return active_farm_queryset(queryset, request, farm_field=farm_field)
+
+
+def _crud_field_schema(model, field_name):
+    if field_name == "password":
+        return {"name": "password", "label": "Senha", "type": "password", "required": False}
+    field = model._meta.get_field(field_name)
+    schema = {"name": field_name, "label": field.verbose_name.title(), "required": not field.blank and not field.null}
+    if getattr(field, "choices", None):
+        schema["type"] = "select"
+        schema["choices"] = [{"value": value, "label": label} for value, label in field.choices]
+    elif field.is_relation:
+        schema["type"] = "relation"
+        schema["model"] = field.remote_field.model._meta.verbose_name.title()
+    elif field.get_internal_type() in {"BooleanField", "NullBooleanField"}:
+        schema["type"] = "checkbox"
+    elif field.get_internal_type() in {"DateField"}:
+        schema["type"] = "date"
+    elif field.get_internal_type() in {"DateTimeField"}:
+        schema["type"] = "datetime-local"
+    elif field.get_internal_type() in {"IntegerField", "PositiveIntegerField", "PositiveSmallIntegerField", "DecimalField", "FloatField"}:
+        schema["type"] = "number"
+    elif field.get_internal_type() in {"TextField", "JSONField"}:
+        schema["type"] = "textarea"
+    else:
+        schema["type"] = "text"
+    return schema
+
+
+def _crud_serialize(obj):
+    data = model_to_dict(obj)
+    data["id"] = str(obj.pk)
+    display = str(obj)
+    for key, value in list(data.items()):
+        if hasattr(value, "isoformat"):
+            data[key] = value.isoformat()
+        elif value is not None and not isinstance(value, (str, int, float, bool, list, dict)):
+            data[key] = str(value)
+    return {"id": str(obj.pk), "display": display, "data": data}
+
+
+def _crud_coerce(field, value):
+    if value in ("", None):
+        return None if field.null or field.blank else value
+    if field.get_internal_type() == "DateField":
+        return parse_date(value)
+    if field.get_internal_type() == "DateTimeField":
+        return parse_datetime(value)
+    return value
+
+
+def _crud_apply(obj, fields, payload):
+    User = get_user_model()
+    password = payload.get("password")
+    for field_name in fields:
+        if field_name == "password":
+            continue
+        if field_name not in payload:
+            continue
+        field = obj._meta.get_field(field_name)
+        value = _crud_coerce(field, payload.get(field_name))
+        if field.is_relation and value:
+            value = field.remote_field.model.objects.get(pk=value)
+        setattr(obj, field_name, value)
+    if isinstance(obj, User) and password:
+        obj.set_password(password)
+
+
+def _crud_payload(request):
+    return json.loads(request.body or "{}")
+
+
+@login_required
+@require_http_methods(["GET"])
+def crud_schema(request):
+    entities = []
+    for key, config in CRUD_ENTITIES.items():
+        try:
+            _crud_queryset(config, request)
+        except PermissionDenied:
+            continue
+        entities.append({"key": key, "label": config["label"]})
+    return JsonResponse({"entities": entities})
+
+
+@login_required
+@require_http_methods(["GET"])
+def crud_listar(request, entity):
+    try:
+        config = _crud_config(entity)
+        model = config["model"]
+        fields = [_crud_field_schema(model, field) for field in config["fields"]]
+        rows = [_crud_serialize(obj) for obj in _crud_queryset(config, request).order_by("-pk")[:300]]
+        return JsonResponse({"entity": entity, "label": config["label"], "fields": fields, "rows": rows})
+    except (PermissionDenied, ValidationError) as e:
+        return permission_error_response(e)
+
+
+@login_required
+@require_http_methods(["GET"])
+def crud_detalhar(request, entity, pk):
+    try:
+        config = _crud_config(entity)
+        obj = _crud_queryset(config, request).get(pk=pk)
+        return JsonResponse(_crud_serialize(obj))
+    except (PermissionDenied, ValidationError) as e:
+        return permission_error_response(e)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=404)
+
+
+@login_required
+@require_http_methods(["POST"])
+def crud_criar(request, entity):
+    try:
+        ensure_super_admin_confirmation(request)
+        config = _crud_config(entity)
+        payload = _crud_payload(request)
+        farm_field = config.get("farm_field")
+        if farm_field is None and not user_is_super_admin(request.user):
+            raise PermissionDenied("Apenas o super admin pode criar esta entidade.")
+        if farm_field is not None:
+            farm = get_request_farm(request, payload)
+            ensure_farm_permission(request.user, farm, config["module"], "create")
+        obj = config["model"]()
+        if farm_field == "farm" and "farm" not in payload:
+            obj.farm = farm
+        _crud_apply(obj, config["fields"], payload)
+        obj.save()
+        return JsonResponse({"success": True, "id": str(obj.pk)}, status=201)
+    except (PermissionDenied, ValidationError) as e:
+        return permission_error_response(e)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+
+@login_required
+@require_http_methods(["PUT", "PATCH"])
+def crud_editar(request, entity, pk):
+    try:
+        ensure_super_admin_confirmation(request)
+        config = _crud_config(entity)
+        payload = _crud_payload(request)
+        obj = _crud_queryset(config, request, action="update").get(pk=pk)
+        if config.get("farm_field") is not None:
+            ensure_farm_permission(request.user, _get_nested_attr(obj, config["farm_field"]), config["module"], "update")
+        _crud_apply(obj, config["fields"], payload)
+        obj.save()
+        return JsonResponse({"success": True})
+    except (PermissionDenied, ValidationError) as e:
+        return permission_error_response(e)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+
+@login_required
+@require_http_methods(["DELETE"])
+def crud_excluir(request, entity, pk):
+    try:
+        ensure_super_admin_confirmation(request)
+        config = _crud_config(entity)
+        obj = _crud_queryset(config, request, action="delete").get(pk=pk)
+        if config.get("farm_field") is not None:
+            ensure_farm_permission(request.user, _get_nested_attr(obj, config["farm_field"]), config["module"], "delete")
+        obj.delete()
+        return JsonResponse({"success": True})
+    except (PermissionDenied, ValidationError) as e:
+        return permission_error_response(e)
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=400)
 
 
 @login_required

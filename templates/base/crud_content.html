@@ -1,0 +1,49 @@
+<div class="crud-shell">
+    <aside class="crud-sidebar">
+        <div class="section-header">
+            <div>
+                <h2>Cadastros</h2>
+                <p>CRUD completo das entidades disponíveis.</p>
+            </div>
+        </div>
+        <select id="crudEntitySelect"></select>
+        <button type="button" class="btn btn-primary" id="crudNewBtn">Novo Registro</button>
+    </aside>
+
+    <section class="crud-main">
+        <div class="content-area crud-panel">
+            <div class="section-header">
+                <div>
+                    <h2 id="crudTitle">Selecione uma entidade</h2>
+                    <p id="crudSubtitle">Listagem, detalhes, criação, edição e exclusão.</p>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="crudTable">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="content-area crud-panel" id="crudFormPanel" hidden>
+            <div class="section-header">
+                <div>
+                    <h2 id="crudFormTitle">Novo Registro</h2>
+                    <p>Preencha os campos disponíveis para a entidade selecionada.</p>
+                </div>
+            </div>
+            <form id="crudForm" class="grid-form"></form>
+        </div>
+
+        <div class="content-area crud-panel" id="crudDetailPanel" hidden>
+            <div class="section-header">
+                <div>
+                    <h2>Detalhes</h2>
+                    <p>Visualização completa do registro selecionado.</p>
+                </div>
+            </div>
+            <div id="crudDetailBody" class="details-grid"></div>
+        </div>
+    </section>
+</div>

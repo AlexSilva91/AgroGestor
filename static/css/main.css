@@ -996,6 +996,50 @@ textarea::placeholder {
     word-break: break-word;
 }
 
+.crud-shell {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.crud-sidebar {
+    position: sticky;
+    top: 86px;
+    display: grid;
+    gap: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: var(--surface-solid);
+    box-shadow: var(--soft-shadow);
+}
+
+.crud-main {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.crud-panel {
+    margin: 0;
+}
+
+.crud-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 42px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: var(--surface-solid);
+}
+
+.crud-check input {
+    width: auto;
+}
+
 #acessosFazendaTable td {
     vertical-align: top;
 }
@@ -1532,6 +1576,14 @@ main.container {
         position: static;
         grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     }
+
+    .crud-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .crud-sidebar {
+        position: static;
+    }
 }
 
 /* Header definitivo: barra limpa, uma linha, sem rolagem */
@@ -1664,7 +1716,8 @@ header .main-nav .tab i {
 }
 
 :root[data-nav-theme="usuarios"],
-:root[data-nav-theme="configuracoes"] {
+:root[data-nav-theme="configuracoes"],
+:root[data-nav-theme="cadastros"] {
     --nav-active-bg: linear-gradient(135deg, #5f5d75, #8d89a6);
     --nav-active-shadow: rgba(95, 93, 117, 0.25);
 }
