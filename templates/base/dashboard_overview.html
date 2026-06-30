@@ -1,0 +1,78 @@
+<section class="analytics-dashboard" aria-label="Métricas do Dashboard">
+    <div class="section-header">
+        <div>
+            <h2>Dashboard</h2>
+            <p id="dashboardMetricScope">Métricas operacionais, produtivas e financeiras.</p>
+        </div>
+    </div>
+
+    <div class="analytics-kpis">
+        <div class="analytics-kpi">
+            <span>Plantéis ativos</span>
+            <strong id="kpiPlanteisAtivos">0</strong>
+        </div>
+        <div class="analytics-kpi">
+            <span>Animais atuais</span>
+            <strong id="kpiAnimaisAtuais">0</strong>
+        </div>
+        <div class="analytics-kpi">
+            <span>Ovos produzidos</span>
+            <strong id="kpiOvosTotal">0</strong>
+        </div>
+        <div class="analytics-kpi">
+            <span>Receita</span>
+            <strong id="kpiReceita">R$ 0,00</strong>
+        </div>
+        <div class="analytics-kpi">
+            <span>Custo</span>
+            <strong id="kpiCusto">R$ 0,00</strong>
+        </div>
+        <div class="analytics-kpi">
+            <span>Resultado</span>
+            <strong id="kpiResultado">R$ 0,00</strong>
+        </div>
+        <div class="analytics-kpi">
+            <span>Ocorrências abertas</span>
+            <strong id="kpiOcorrenciasAbertas">0</strong>
+        </div>
+        <div class="analytics-kpi">
+            <span>Mortalidade</span>
+            <strong id="kpiMortalidade">0</strong>
+        </div>
+        <div class="analytics-kpi">
+            <span>Natalidade</span>
+            <strong id="kpiNatalidade">0</strong>
+        </div>
+    </div>
+
+    <div class="analytics-grid">
+        <article class="analytics-chart">
+            <h3>Plantel por cultura</h3>
+            <canvas id="chartPlantelCultura" height="240"></canvas>
+        </article>
+        <article class="analytics-chart">
+            <h3>Status dos plantéis</h3>
+            <canvas id="chartPlantelStatus" height="240"></canvas>
+        </article>
+        <article class="analytics-chart wide">
+            <h3>Produção de ovos nos últimos 14 dias</h3>
+            <canvas id="chartProducaoOvos" height="220"></canvas>
+        </article>
+        <article class="analytics-chart wide">
+            <h3>Movimento financeiro por plantel</h3>
+            <canvas id="chartFinanceiroPlantel" height="220"></canvas>
+        </article>
+        <article class="analytics-chart wide">
+            <h3>Sanidade comparativa por mês</h3>
+            <canvas id="chartSanidadeMes" height="220"></canvas>
+        </article>
+        <article class="analytics-chart">
+            <h3>Ocorrências sanitárias por plantel</h3>
+            <canvas id="chartSanidadePlantel" height="240"></canvas>
+        </article>
+        <article class="analytics-chart">
+            <h3>Mortalidade versus natalidade</h3>
+            <canvas id="chartMortalidadeNatalidade" height="240"></canvas>
+        </article>
+    </div>
+</section>

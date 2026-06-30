@@ -5,7 +5,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block Titulo %}Haras Cavalcanti{% endblock %}</title>
+    <title>{% block Titulo %}AgroGestor{% endblock %}</title>
+    <script>
+        (function () {
+            var saved = localStorage.getItem('agrogestor-theme');
+            var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/financeiro.css' %}">
@@ -28,13 +35,27 @@
         </div>
     </div>
 
+    <script>
+        window.AGROGESTOR_CONTEXT = {
+            isSuperAdmin: {{ request.user.is_superuser|yesno:"true,false" }},
+            activeFarmId: "{% if fazenda_ativa %}{{ fazenda_ativa.id }}{% endif %}",
+            modulosLiberados: {{ modulos_liberados|default:"[]"|safe }}
+        };
+    </script>
+    <script src="{% static 'js/secure_fetch.js' %}"></script>
+    <script src="{% static 'js/super_admin_guard.js' %}"></script>
+    <script src="{% static 'js/theme_toggle.js' %}"></script>
+    <script src="{% static 'js/fazenda_ativa.js' %}"></script>
     <script src="{% static 'js/index.js' %}"></script>
+    <script src="{% static 'js/dashboard_metricas.js' %}"></script>
     <script src="{% static 'js/models/financeiro.js' %}"></script>
     <script src="{% static 'js/models/animais.js' %}"></script>
     <script src="{% static 'js/models/rebanhos.js' %}"></script>
     <script src="{% static 'js/models/pastagens.js' %}"></script>
     <script src="{% static 'js/models/movimentacao_animal.js' %}"></script>
+    <script src="{% static 'js/models/gestao_integrada.js' %}"></script>
     <script src="{% static 'js/models/usuarios.js' %}"></script>
+    <script src="{% static 'js/configuracoes_integradas.js' %}"></script>
     <script src="{% static 'js/logout.js' %}"></script>
     {% block scripts %}{% endblock %}
 </body>

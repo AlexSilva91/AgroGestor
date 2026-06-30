@@ -1,6 +1,5 @@
-# Ignorar todas as pastas migrations e seus arquivos, exceto __init__.py
-**/migrations/
-!**/migrations/__init__.py
+# Banco SQLite local de desenvolvimento
+db.sqlite3
 
 # Ignorar cache do Python
 __pycache__/

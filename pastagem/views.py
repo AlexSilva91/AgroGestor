@@ -1,125 +1,142 @@
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
-from django.forms.models import model_to_dict
-from core.models import Fazenda
-from .models import Pastagem, MovimentacaoAnimal
-from rebanho.models import Animal
 import json
 import uuid
-from django.utils.dateparse import parse_date
 
-# =======================
-# Pastagem CRUD
-# =======================
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.forms.models import model_to_dict
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.utils.dateparse import parse_date
+from django.views.decorators.http import require_http_methods
+
+from core.permissions import (
+    active_farm_queryset,
+    ensure_farm_permission,
+    ensure_super_admin_confirmation,
+    get_request_farm,
+    module_queryset,
+    permission_error_response,
+    tenant_get_or_404,
+)
+from rebanho.models import Animal
+from .models import MovimentacaoAnimal, Pastagem
+
+
 @login_required
 @require_http_methods(["GET"])
 def listar_pastagens(request):
-    pastagens = Pastagem.objects.select_related("farm").order_by("-criado_em")
-    data = [
+    pastagens = active_farm_queryset(
+        module_queryset(Pastagem.objects.select_related("farm"), request.user, "pastagem"),
+        request,
+    ).order_by("-criado_em")
+    return JsonResponse([
         {
-            "id": str(p.id),
-            "farm_id": getattr(p.farm, 'id', None),
-            "nome": p.nome,
-            "area": float(p.area) if p.area else None,
-            "capacidade_suporte": p.capacidade_suporte,
-            "ativo": p.ativo,
-            "criado_em": p.criado_em.strftime("%Y-%m-%d %H:%M"),
+            "id": str(item.id),
+            "farm_id": str(item.farm_id) if item.farm_id else None,
+            "nome": item.nome,
+            "area": float(item.area) if item.area else None,
+            "capacidade_suporte": item.capacidade_suporte,
+            "ativo": item.ativo,
+            "criado_em": item.criado_em.strftime("%Y-%m-%d %H:%M"),
         }
-        for p in pastagens
-    ]
-    return JsonResponse(data, safe=False)
+        for item in pastagens
+    ], safe=False)
 
 
 @login_required
 @require_http_methods(["GET"])
 def detalhar_pastagem(request, pk):
-    pastagem = get_object_or_404(Pastagem, pk=pk)
+    pastagem = get_object_or_404(module_queryset(Pastagem.objects.all(), request.user, "pastagem"), pk=pk)
     data = model_to_dict(pastagem)
     data["id"] = str(pastagem.id)
     return JsonResponse(data)
 
 
 @login_required
-@csrf_exempt
 @require_http_methods(["POST"])
 def criar_pastagem(request):
     try:
-        payload = json.loads(request.body)
-        farm = Fazenda.objects.first()
+        ensure_super_admin_confirmation(request)
+        payload = json.loads(request.body or "{}")
+        farm = get_request_farm(request, payload)
+        ensure_farm_permission(request.user, farm, "pastagem", "create")
         pastagem = Pastagem.objects.create(
             id=uuid.uuid4(),
             farm=farm,
             nome=payload.get("nome"),
             area=payload.get("area"),
             capacidade_suporte=payload.get("capacidade_suporte"),
-            ativo=payload.get("ativo", True)
+            ativo=payload.get("ativo", True),
         )
         return JsonResponse({"success": True, "id": str(pastagem.id)})
+    except (PermissionDenied, ValidationError) as e:
+        return permission_error_response(e)
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
 
 
 @login_required
-@csrf_exempt
 @require_http_methods(["PUT"])
 def editar_pastagem(request, pk):
     try:
-        payload = json.loads(request.body)
-        pastagem = get_object_or_404(Pastagem, pk=pk)
-
-        pastagem.nome = payload.get("nome", pastagem.nome)
-        pastagem.area = payload.get("area", pastagem.area)
-        pastagem.capacidade_suporte = payload.get("capacidade_suporte", pastagem.capacidade_suporte)
-        pastagem.ativo = payload.get("ativo", pastagem.ativo)
+        ensure_super_admin_confirmation(request)
+        payload = json.loads(request.body or "{}")
+        pastagem = tenant_get_or_404(Pastagem.objects.all(), request.user, pk=pk)
+        ensure_farm_permission(request.user, pastagem.farm, "pastagem", "update")
+        for field in ("nome", "area", "capacidade_suporte", "ativo"):
+            if field in payload:
+                setattr(pastagem, field, payload[field])
         pastagem.save()
-
         return JsonResponse({"success": True})
+    except (PermissionDenied, ValidationError) as e:
+        return permission_error_response(e)
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
 
 
 @login_required
-@csrf_exempt
 @require_http_methods(["DELETE"])
 def excluir_pastagem(request, pk):
     try:
-        pastagem = get_object_or_404(Pastagem, pk=pk)
+        ensure_super_admin_confirmation(request)
+        pastagem = tenant_get_or_404(Pastagem.objects.all(), request.user, pk=pk)
+        ensure_farm_permission(request.user, pastagem.farm, "pastagem", "delete")
         pastagem.delete()
         return JsonResponse({"success": True})
+    except (PermissionDenied, ValidationError) as e:
+        return permission_error_response(e)
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
 
 
-# =======================
-# MovimentacaoAnimal CRUD
-# =======================
 @login_required
 @require_http_methods(["GET"])
 def listar_movimentacoes(request):
-    movs = MovimentacaoAnimal.objects.select_related("animal", "pastagem").order_by("-criado_em")
-    data = [
+    movs = active_farm_queryset(
+        module_queryset(MovimentacaoAnimal.objects.select_related("animal", "pastagem"), request.user, "pastagem", farm_field="animal__farm"),
+        request,
+        farm_field="animal__farm",
+    ).order_by("-criado_em")
+    return JsonResponse([
         {
-            "id": str(m.id),
-            "animal_id": getattr(m.animal, 'id', None),
-            "animal_codigo": getattr(m.animal, 'codigo_brincos', 'N/A'),
-            "pastagem_id": getattr(m.pastagem, 'id', None),
-            "pastagem_nome": getattr(m.pastagem, 'nome', 'N/A'), 
-            "data_entrada": m.data_entrada.strftime("%d/%m/%Y") if m.data_entrada else None,
-            "data_saida": m.data_saida.strftime("%d/%m/%Y") if m.data_saida else None,
-            "observacoes": m.observacoes, 
-            "criado_em": m.criado_em.strftime("%d/%m/%Y %H:%M"),
+            "id": str(item.id),
+            "animal_id": str(item.animal_id) if item.animal_id else None,
+            "animal_codigo": item.animal.codigo_brincos if item.animal else "N/A",
+            "pastagem_id": str(item.pastagem_id) if item.pastagem_id else None,
+            "pastagem_nome": item.pastagem.nome if item.pastagem else "N/A",
+            "data_entrada": item.data_entrada.strftime("%d/%m/%Y") if item.data_entrada else None,
+            "data_saida": item.data_saida.strftime("%d/%m/%Y") if item.data_saida else None,
+            "observacoes": item.observacoes,
+            "criado_em": item.criado_em.strftime("%d/%m/%Y %H:%M"),
         }
-        for m in movs
-    ]
-    return JsonResponse(data, safe=False)
+        for item in movs
+    ], safe=False)
+
 
 @login_required
 @require_http_methods(["GET"])
 def detalhar_movimentacao(request, pk):
-    mov = get_object_or_404(MovimentacaoAnimal, pk=pk)
+    mov = get_object_or_404(module_queryset(MovimentacaoAnimal.objects.all(), request.user, "pastagem", farm_field="animal__farm"), pk=pk)
     data = model_to_dict(mov)
     data["id"] = str(mov.id)
     data["data_entrada"] = mov.data_entrada.strftime("%Y-%m-%d") if mov.data_entrada else None
@@ -128,54 +145,63 @@ def detalhar_movimentacao(request, pk):
 
 
 @login_required
-@csrf_exempt
 @require_http_methods(["POST"])
 def criar_movimentacao(request):
     try:
-        payload = json.loads(request.body)
-        animal = get_object_or_404(Animal, pk=payload.get("animal"))
-        pastagem = get_object_or_404(Pastagem, pk=payload.get("pastagem"))
-
+        ensure_super_admin_confirmation(request)
+        payload = json.loads(request.body or "{}")
+        farm = get_request_farm(request, payload)
+        ensure_farm_permission(request.user, farm, "pastagem", "create")
         mov = MovimentacaoAnimal.objects.create(
             id=uuid.uuid4(),
-            animal=animal,
-            pastagem=pastagem,
+            animal=get_object_or_404(Animal, pk=payload.get("animal"), farm=farm),
+            pastagem=get_object_or_404(Pastagem, pk=payload.get("pastagem"), farm=farm),
             data_entrada=parse_date(payload.get("data_entrada")) or None,
-            data_saida=parse_date(payload.get("data_saida")) or None
+            data_saida=parse_date(payload.get("data_saida")) or None,
+            observacoes=payload.get("observacoes"),
         )
         return JsonResponse({"success": True, "id": str(mov.id)})
+    except (PermissionDenied, ValidationError) as e:
+        return permission_error_response(e)
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
 
 
 @login_required
-@csrf_exempt
 @require_http_methods(["PUT"])
 def editar_movimentacao(request, pk):
     try:
-        payload = json.loads(request.body)
-        mov = get_object_or_404(MovimentacaoAnimal, pk=pk)
-
+        ensure_super_admin_confirmation(request)
+        payload = json.loads(request.body or "{}")
+        mov = get_object_or_404(module_queryset(MovimentacaoAnimal.objects.all(), request.user, "pastagem", farm_field="animal__farm"), pk=pk)
+        farm = mov.animal.farm if mov.animal else mov.pastagem.farm
+        ensure_farm_permission(request.user, farm, "pastagem", "update")
         if payload.get("animal"):
-            mov.animal = get_object_or_404(Animal, pk=payload.get("animal"))
+            mov.animal = get_object_or_404(Animal, pk=payload.get("animal"), farm=farm)
         if payload.get("pastagem"):
-            mov.pastagem = get_object_or_404(Pastagem, pk=payload.get("pastagem"))
-
+            mov.pastagem = get_object_or_404(Pastagem, pk=payload.get("pastagem"), farm=farm)
         mov.data_entrada = parse_date(payload.get("data_entrada")) or mov.data_entrada
         mov.data_saida = parse_date(payload.get("data_saida")) or mov.data_saida
+        mov.observacoes = payload.get("observacoes", mov.observacoes)
         mov.save()
         return JsonResponse({"success": True})
+    except (PermissionDenied, ValidationError) as e:
+        return permission_error_response(e)
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)
 
 
 @login_required
-@csrf_exempt
 @require_http_methods(["DELETE"])
 def excluir_movimentacao(request, pk):
     try:
-        mov = get_object_or_404(MovimentacaoAnimal, pk=pk)
+        ensure_super_admin_confirmation(request)
+        mov = get_object_or_404(module_queryset(MovimentacaoAnimal.objects.all(), request.user, "pastagem", farm_field="animal__farm"), pk=pk)
+        farm = mov.animal.farm if mov.animal else mov.pastagem.farm
+        ensure_farm_permission(request.user, farm, "pastagem", "delete")
         mov.delete()
         return JsonResponse({"success": True})
+    except (PermissionDenied, ValidationError) as e:
+        return permission_error_response(e)
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=400)

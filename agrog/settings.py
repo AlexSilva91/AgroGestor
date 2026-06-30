@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,9 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-sz5u)m6ftf7#3y(@ut5bco5n-!jc_ts*d1co8zf1l)+$uc)_@w'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG", "1").lower() in {"1", "true", "yes", "on"}
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if os.getenv("DJANGO_ALLOWED_HOSTS") else []
+
+ENVIRONMENT = os.getenv("DJANGO_ENV", "development").lower()
+IS_DEVELOPMENT = ENVIRONMENT in {"development", "dev", "local"}
 
 
 # Application definition
@@ -38,14 +42,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'django.contrib.postgres',  
         # apps do AgroGestor
     'core',
     'rebanho',
     'pastagem',
     'financeiro',
     'iot',
+    'gestao',
 ]
+
+if not IS_DEVELOPMENT:
+    INSTALLED_APPS.append('django.contrib.postgres')
 
 # Configurações de autenticação
 LOGIN_URL = '/'  # Define a rota raiz como página de login
@@ -58,6 +65,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'core.middleware.AuditLogMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -85,16 +93,24 @@ WSGI_APPLICATION = 'agrog.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "agrogestor",        # nome do banco PostgreSQL
-        "USER": "ourinet",          # usuário do PostgreSQL
-        "PASSWORD": "mk20ur1cli",        # senha do usuário
-        "HOST": "localhost",         # servidor do banco
-        "PORT": "5432",              # porta padrão do PostgreSQL
+if IS_DEVELOPMENT:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB", "agrogestor"),
+            "USER": os.getenv("POSTGRES_USER", "ourinet"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+            "HOST": os.getenv("POSTGRES_HOST", "localhost"),
+            "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        }
+    }
 
 
 # Password validation
@@ -137,6 +153,27 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+
+if not IS_DEVELOPMENT:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+else:
+    SECURE_SSL_REDIRECT = False
+
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
+BACKUP_ROOT = BASE_DIR / os.getenv("BACKUP_ROOT", "backups")
 
 
 # Default primary key field type

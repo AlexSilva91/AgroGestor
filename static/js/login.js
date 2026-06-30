@@ -2,7 +2,7 @@
 document.getElementById('loginForm').addEventListener('submit', async function (e) {
     e.preventDefault();
 
-    const login = document.getElementById('login').value;
+    const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const loginButton = document.getElementById('loginButton');
     const buttonText = loginButton.querySelector('.button-text');
@@ -14,15 +14,8 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     messageDiv.textContent = '';
 
     // Validação básica
-    if (!login || !password) {
+    if (!email || !password) {
         showMessage('Por favor, preencha todos os campos obrigatórios.', 'error');
-        return;
-    }
-
-    // Validação do formato do login (first_name.last_name)
-    const loginRegex = /^[a-zA-Z]+\.[a-zA-Z]+$/;
-    if (!loginRegex.test(login)) {
-        showMessage('Por favor, insira um login válido no formato: primeiro_nome.ultimo_nome', 'error');
         return;
     }
 
@@ -39,7 +32,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
                 'X-CSRFToken': getCSRFToken()
             },
             body: JSON.stringify({
-                login: login,
+                email: email,
                 password: password
             })
         });
@@ -88,17 +81,4 @@ inputs.forEach(input => {
     input.addEventListener('blur', function () {
         this.parentElement.style.transform = 'scale(1)';
     });
-});
-
-// Formatação automática do campo de login
-document.getElementById('login').addEventListener('input', function (e) {
-    let value = e.target.value.toLowerCase();
-    // Remove caracteres especiais, mantendo apenas letras e ponto
-    value = value.replace(/[^a-zA-Z.]/g, '');
-    // Garante que há apenas um ponto
-    const parts = value.split('.');
-    if (parts.length > 2) {
-        value = parts[0] + '.' + parts.slice(1).join('');
-    }
-    e.target.value = value;
 });

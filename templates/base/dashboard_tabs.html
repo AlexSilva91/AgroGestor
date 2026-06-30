@@ -1,14 +1,4 @@
-<div class="section-tabs">
-    <div class="tab active" data-tab="lancamentos">Lançamentos Financeiros</div>
-    <div class="tab" data-tab="animais">Animais</div>
-    <div class="tab" data-tab="rebanhos">Rebanhos</div>
-    <div class="tab" data-tab="pastagens">Pastagens</div>
-    <div class="tab" data-tab="movimentacoes">Movimentações</div>
-    <div class="tab" data-tab="usuarios">Usuários</div>
-</div>
-
-<!-- Conteúdo principal com espaçamento -->
-<section class="content-wrapper">
+<div class="dashboard-workspace">
 
     <!-- Lançamentos Financeiros -->
     {% include "models/lancamentos.html" %}
@@ -25,7 +15,10 @@
     <!-- Movimentações -->
     {% include "models/movimentacoes.html" %}
 
+    <!-- Gestão Integrada -->
+    {% include "models/gestao_integrada.html" %}
+
     <!-- Usuários -->
     {% include "models/usuarios.html" %}
 
-</section>
+</div>

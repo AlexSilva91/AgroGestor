@@ -1,36 +1,21 @@
 // Controle de tabs
 document.addEventListener('DOMContentLoaded', function () {
-    // Configurar tabs
-    const tabs = document.querySelectorAll('.tab');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const tabId = tab.getAttribute('data-tab');
-            ativarTab(tabId);
-        });
-    });
-
     // Botão adicionar usuário
-    document.getElementById('addUsuario').addEventListener('click', () => {
+    document.getElementById('addUsuario')?.addEventListener('click', () => {
         abrirModalUsuario();
     });
 
     // Fechar modal
-    document.getElementById('closeUserModal').addEventListener('click', fecharModal);
+    document.getElementById('closeUserModal')?.addEventListener('click', fecharModal);
 
     // Configurar formulário
-    document.getElementById('userForm').addEventListener('submit', salvarUsuario);
+    document.getElementById('userForm')?.addEventListener('submit', salvarUsuario);
 });
 
 function ativarTab(tabId) {
-    // Desativar todas as tabs
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-    // Ativar tab selecionada
-    document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
-    document.getElementById(tabId).classList.add('active');
+    if (typeof activateTab === 'function') {
+        activateTab(tabId);
+    }
 }
 
 function abrirModalUsuario(usuarioId = null) {
@@ -40,9 +25,15 @@ function abrirModalUsuario(usuarioId = null) {
 
     if (usuarioId) {
         title.textContent = 'Editar Usuário';
+        form.dataset.usuarioId = usuarioId;
+        document.getElementById('password').required = false;
+        document.getElementById('confirm_password').required = false;
         carregarDadosUsuario(usuarioId);
     } else {
         title.textContent = 'Novo Usuário';
+        delete form.dataset.usuarioId;
+        document.getElementById('password').required = true;
+        document.getElementById('confirm_password').required = true;
         form.reset();
     }
 
@@ -81,15 +72,17 @@ function salvarUsuario(event) {
     event.preventDefault();
 
     const formData = new FormData(event.target);
+    const body = new URLSearchParams(formData);
     const usuarioId = document.getElementById('userForm').dataset.usuarioId;
 
-    const url = usuarioId ? `/api/usuarios/${usuarioId}/` : '/api/usuarios/';
+    const url = usuarioId ? `/api/usuarios/${usuarioId}/editar/` : '/api/usuarios/';
     const method = usuarioId ? 'PUT' : 'POST';
 
     fetch(url, {
         method: method,
-        body: formData,
+        body: body,
         headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
         }
     })
@@ -152,7 +145,7 @@ function desativarUsuario(usuarioId) {
 
 function excluirUsuario(usuarioId) {
     if (confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.')) {
-        fetch(`/api/usuarios/${usuarioId}/`, {
+        fetch(`/api/usuarios/${usuarioId}/excluir/`, {
             method: 'DELETE',
             headers: {
                 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value

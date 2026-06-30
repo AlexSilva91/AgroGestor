@@ -1,33 +1,30 @@
-// Elementos DOM específicos do dashboard
-const tabs = document.querySelectorAll('.tab');
-const tabContents = document.querySelectorAll('.tab-content');
-const navLinks = document.querySelectorAll('nav a');
-const pageContents = document.querySelectorAll('.page-content');
-
-// Inicialização do Dashboard
 document.addEventListener('DOMContentLoaded', function () {
     initializeDashboard();
 });
 
 function initializeDashboard() {
-    // Configurar eventos de tabs
-    tabs.forEach(tab => {
+    applyModuleVisibility();
+
+    document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => {
-            const tabId = tab.getAttribute('data-tab');
-            activateTab(tabId);
+            activatePage('dashboard');
+            activateTab(tab.getAttribute('data-tab'));
         });
     });
 
-    // Configurar eventos de navegação
-    navLinks.forEach(link => {
+    document.querySelectorAll('nav a').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const pageId = link.getAttribute('data-page');
             activatePage(pageId);
+            if (pageId === 'dashboard') {
+                activateDashboardOverview();
+            }
         });
     });
 
-    // Configurar formulário de configurações
+    activateDashboardOverview();
+
     const configForm = document.getElementById('configForm');
     if (configForm) {
         configForm.addEventListener('submit', function (e) {
@@ -37,19 +34,98 @@ function initializeDashboard() {
     }
 }
 
-// Funções de controle de páginas e tabs
-function activatePage(pageId) {
-    pageContents.forEach(content => content.classList.remove('active'));
-    navLinks.forEach(link => link.classList.remove('active'));
+function applyModuleVisibility() {
+    const context = window.AGROGESTOR_CONTEXT || {};
+    if (context.isSuperAdmin) return;
 
-    document.getElementById(pageId).classList.add('active');
-    document.querySelector(`nav a[data-page="${pageId}"]`).classList.add('active');
+    const allowedModules = new Set(context.modulosLiberados || []);
+    document.querySelectorAll('.tab[data-module]').forEach(tab => {
+        const moduleCode = tab.dataset.module;
+        const shouldShow = !moduleCode || moduleCode === 'usuarios' || allowedModules.has(moduleCode);
+        tab.hidden = !shouldShow;
+
+        const content = document.getElementById(tab.dataset.tab);
+        if (content) {
+            content.hidden = !shouldShow;
+        }
+    });
+}
+
+function activatePage(pageId) {
+    const page = document.getElementById(pageId);
+    const link = document.querySelector(`nav a[data-page="${pageId}"]`);
+    if (!page || !link) return;
+
+    document.querySelectorAll('.page-content').forEach(content => content.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(navLink => navLink.classList.remove('active'));
+
+    page.classList.add('active');
+    link.classList.add('active');
+    setNavTheme(pageId);
+
+    if (pageId !== 'dashboard') {
+        setDashboardWorkspace(false);
+    }
 }
 
 function activateTab(tabId) {
-    tabs.forEach(tab => tab.classList.remove('active'));
-    tabContents.forEach(content => content.classList.remove('active'));
+    const tab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+    const content = document.getElementById(tabId);
+    if (!tab || !content || tab.hidden || content.hidden) return;
 
-    document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
-    document.getElementById(tabId).classList.add('active');
+    document.querySelectorAll('.tab').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(navLink => navLink.classList.remove('active'));
+
+    tab.classList.add('active');
+    content.classList.add('active');
+    setNavTheme(tabId);
+    setDashboardWorkspace(true);
+    setDashboardOverview(false);
+}
+
+function activateDashboardOverview() {
+    document.querySelectorAll('.tab').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(item => item.classList.remove('active'));
+    document.querySelector('nav a[data-page="dashboard"]')?.classList.add('active');
+    setNavTheme('dashboard');
+    setDashboardWorkspace(false);
+    setDashboardOverview(true);
+}
+
+function setDashboardOverview(visible) {
+    const overview = document.querySelector('.analytics-dashboard');
+    if (overview) {
+        overview.hidden = !visible;
+    }
+}
+
+function setDashboardWorkspace(visible) {
+    const workspace = document.querySelector('.dashboard-workspace');
+    if (workspace) {
+        workspace.hidden = !visible;
+    }
+}
+
+function setNavTheme(key) {
+    const themes = {
+        dashboard: 'dashboard',
+        lancamentos: 'financeiro',
+        financeiro: 'financeiro',
+        animais: 'rebanho',
+        rebanhos: 'rebanho',
+        pastagens: 'pastagem',
+        movimentacoes: 'pastagem',
+        'gestao-integrada': 'gestao',
+        'manejo-operacional': 'manejo',
+        'nutricao-operacional': 'nutricao',
+        'sanidade-operacional': 'sanidade',
+        'producao-operacional': 'producao',
+        usuarios: 'usuarios',
+        relatorios: 'relatorios',
+        configuracoes: 'configuracoes',
+        ajuda: 'ajuda',
+        Sair: 'sair'
+    };
+    document.documentElement.dataset.navTheme = themes[key] || 'dashboard';
 }

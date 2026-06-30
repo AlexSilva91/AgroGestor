@@ -14,4 +14,5 @@ class LancamentoFinanceiro(models.Model):
     descricao = models.TextField(blank=True, null=True)
     data_movimento = models.DateField()
     animal = models.ForeignKey(Animal, on_delete=models.SET_NULL, null=True, blank=True)
+    plantel = models.ForeignKey("gestao.Plantel", on_delete=models.SET_NULL, null=True, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)

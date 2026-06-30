@@ -1,6 +1,76 @@
-<div class="content-area">
+<div class="settings-layout">
+<aside class="settings-sidebar">
+    {% if is_super_admin %}<a href="#cfg-nova-fazenda">Nova Fazenda</a>{% endif %}
+    <a href="#cfg-sistema">Sistema</a>
+    <a href="#cfg-auditoria">Auditoria</a>
+    <a href="#cfg-backup">Backups</a>
+    <a href="#cfg-modulos">Módulos</a>
+    <a href="#cfg-permissoes">Permissões</a>
+</aside>
+<div class="settings-content">
+{% if is_super_admin %}
+<div class="content-area config-panel" id="cfg-nova-fazenda">
     <div class="section-header">
-        <h2>Configurações do Sistema</h2>
+        <div>
+            <h2>Nova Fazenda</h2>
+            <p>Cadastre a fazenda, defina o admin responsável e libere módulos conforme o ramo.</p>
+        </div>
+    </div>
+    <form id="novaFazendaForm" class="grid-form">
+        <div class="form-group">
+            <label for="novaFazendaNome">Nome da fazenda</label>
+            <input type="text" id="novaFazendaNome" name="nome" required>
+        </div>
+        <div class="form-group">
+            <label for="novaFazendaLocalizacao">Localização</label>
+            <input type="text" id="novaFazendaLocalizacao" name="localizacao">
+        </div>
+        <div class="form-group">
+            <label for="novaFazendaRamo">Ramo de atuação</label>
+            <select id="novaFazendaRamo" name="ramo_atuacao">
+                <option value="AVICULTURA_POSTURA">Avicultura de postura</option>
+                <option value="AVICULTURA_CORTE">Avicultura de corte</option>
+                <option value="SUINOCULTURA">Suinocultura</option>
+                <option value="OVINOCULTURA">Ovinocultura</option>
+                <option value="BOVINOCULTURA">Bovinocultura</option>
+                <option value="CAPRINOCULTURA">Caprinocultura</option>
+                <option value="PISCICULTURA">Piscicultura</option>
+                <option value="MULTICULTURA" selected>Multicultura</option>
+                <option value="OUTRA">Outra</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="novoAdminEmail">E-mail do admin</label>
+            <input type="email" id="novoAdminEmail" name="admin_email" required>
+        </div>
+        <div class="form-group">
+            <label for="novoAdminUsername">Usuário do admin</label>
+            <input type="text" id="novoAdminUsername" name="admin_username">
+        </div>
+        <div class="form-group">
+            <label for="novoAdminFirstName">Nome</label>
+            <input type="text" id="novoAdminFirstName" name="admin_first_name">
+        </div>
+        <div class="form-group">
+            <label for="novoAdminLastName">Sobrenome</label>
+            <input type="text" id="novoAdminLastName" name="admin_last_name">
+        </div>
+        <div class="form-group">
+            <label for="novoAdminPassword">Senha inicial</label>
+            <input type="password" id="novoAdminPassword" name="admin_password" autocomplete="new-password">
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Cadastrar Fazenda</button>
+        </div>
+    </form>
+</div>
+{% endif %}
+<div class="content-area config-panel" id="cfg-sistema">
+    <div class="section-header">
+        <div>
+            <h2>Configurações do Sistema</h2>
+            <p>Dados gerais da fazenda ativa e contatos administrativos.</p>
+        </div>
     </div>
     <div class="form-container">
         <form id="configForm">
@@ -29,4 +99,137 @@
             </div>
         </form>
     </div>
+</div>
+
+<div class="content-area config-panel" id="cfg-auditoria">
+    <div class="section-header">
+        <div>
+            <h2>Auditoria</h2>
+            <p>Últimas ações registradas no sistema.</p>
+        </div>
+    </div>
+    <div class="table-container">
+        <table id="auditoriaTable">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Usuário</th>
+                    <th>Fazenda</th>
+                    <th>Ação</th>
+                    <th>Descrição</th>
+                    <th>Rota</th>
+                    <th>Status</th>
+                    <th>IP</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="content-area config-panel" id="cfg-backup">
+    <div class="section-header">
+        <div>
+            <h2>Backups Automáticos</h2>
+            <p>Rotina de segurança e histórico de execuções.</p>
+        </div>
+    </div>
+    <div class="form-container">
+        <form id="backupConfigForm" class="grid-form">
+            <label>
+                <input type="checkbox" id="backupAtivo">
+                Backup ativo
+            </label>
+            <div class="form-group">
+                <label for="backupFrequencia">Frequência</label>
+                <select id="backupFrequencia">
+                    <option value="DIARIO">Diário</option>
+                    <option value="SEMANAL">Semanal</option>
+                    <option value="MENSAL">Mensal</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="backupHora">Horário</label>
+                <input type="time" id="backupHora" value="02:00">
+            </div>
+            <div class="form-group">
+                <label for="backupDestino">Destino</label>
+                <input type="text" id="backupDestino" value="backups">
+            </div>
+            <div class="form-group">
+                <label for="backupManter">Manter últimos</label>
+                <input type="number" id="backupManter" min="1" value="7">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Salvar Backup</button>
+                <button type="button" class="btn btn-secondary" id="executarBackupManual">Executar Agora</button>
+            </div>
+        </form>
+    </div>
+    <div class="table-container">
+        <table id="backupExecucoesTable">
+            <thead>
+                <tr>
+                    <th>Início</th>
+                    <th>Status</th>
+                    <th>Arquivo</th>
+                    <th>Mensagem</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="content-area config-panel" id="cfg-modulos">
+    <div class="section-header">
+        <div>
+            <h2>Módulos da Fazenda</h2>
+            <p>Liberação dos módulos contratados ou habilitados.</p>
+        </div>
+    </div>
+    <div class="table-container">
+        <table id="modulosFazendaTable">
+            <thead>
+                <tr>
+                    <th>Módulo</th>
+                    <th>Descrição</th>
+                    <th>Liberado</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" id="salvarModulosFazenda">Salvar Módulos</button>
+        </div>
+    </div>
+</div>
+
+<div class="content-area config-panel" id="cfg-permissoes">
+    <div class="section-header">
+        <div>
+            <h2>Permissões dos Operadores</h2>
+            <p>Controle de acesso por módulo e ação.</p>
+        </div>
+    </div>
+    <div class="table-container">
+        <table id="acessosFazendaTable">
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Perfil</th>
+                    <th>Gestão</th>
+                    <th>Manejo</th>
+                    <th>Nutrição</th>
+                    <th>Sanidade</th>
+                    <th>Produção</th>
+                    <th>Financeiro</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+</div>
 </div>

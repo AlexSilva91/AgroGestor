@@ -1,0 +1,183 @@
+<div id="gestao-integrada" class="tab-content">
+    <div class="section-header">
+        <div>
+            <h2>Gestão</h2>
+            <p>Instalações, plantéis e resultado por fazenda.</p>
+        </div>
+    </div>
+
+    <div class="metric-grid" id="gestaoResumo">
+        <div class="metric-card">
+            <i class="fas fa-layer-group"></i>
+            <strong id="giPlanteis">0</strong>
+            <span>Plantéis ativos</span>
+        </div>
+        <div class="metric-card">
+            <i class="fas fa-calendar-check"></i>
+            <strong id="giPendentes">0</strong>
+            <span>Manejos pendentes</span>
+        </div>
+        <div class="metric-card">
+            <i class="fas fa-triangle-exclamation"></i>
+            <strong id="giAtrasadas">0</strong>
+            <span>Tarefas atrasadas</span>
+        </div>
+        <div class="metric-card">
+            <i class="fas fa-kit-medical"></i>
+            <strong id="giSanidade">0</strong>
+            <span>Ocorrências abertas</span>
+        </div>
+        <div class="metric-card">
+            <i class="fas fa-egg"></i>
+            <strong id="giOvos">0</strong>
+            <span>Ovos hoje</span>
+        </div>
+    </div>
+
+    <div class="module-grid two-columns">
+        <div class="form-container module-panel">
+            <h3>Instalação</h3>
+            <form id="giInstalacaoForm" class="grid-form">
+                <input name="nome" placeholder="Nome do galpão/baia/enfermaria" required>
+                <select name="tipo" required>
+                    <option value="GALPAO">Galpão</option>
+                    <option value="BAIA">Baia</option>
+                    <option value="PIQUETE">Piquete</option>
+                    <option value="ENFERMARIA">Enfermaria</option>
+                    <option value="QUARENTENA">Quarentena</option>
+                    <option value="FABRICA_RACAO">Fábrica de ração</option>
+                </select>
+                <select name="cultura" class="gi-culturas"></select>
+                <input name="area_m2" type="number" step="0.01" placeholder="Área m²">
+                <input name="capacidade_informada" type="number" placeholder="Capacidade informada">
+                <button class="btn btn-primary" type="submit">Salvar Instalação</button>
+            </form>
+        </div>
+
+        <div class="form-container module-panel">
+            <h3>Plantel por Instalação</h3>
+            <form id="giPlantelForm" class="grid-form">
+                <input name="codigo" placeholder="Código do plantel" required>
+                <input name="nome" placeholder="Nome do plantel" required>
+                <select name="cultura" class="gi-culturas" required></select>
+                <select name="finalidade" id="giFinalidade"></select>
+                <select name="instalacao" id="giInstalacoes"></select>
+                <input name="data_alojamento" type="date" required>
+                <input name="quantidade_inicial" type="number" placeholder="Qtd. inicial" required>
+                <input name="quantidade_atual" type="number" placeholder="Qtd. atual" required>
+                <button class="btn btn-primary" type="submit">Salvar Plantel</button>
+            </form>
+            <div id="giCapacidade" class="message hidden"></div>
+        </div>
+    </div>
+
+    <div class="table-container module-table">
+        <h3>Resultado por Plantel</h3>
+        <table id="giRelatorioTable">
+            <thead>
+                <tr>
+                    <th>Plantel</th>
+                    <th>Cultura</th>
+                    <th>Qtd.</th>
+                    <th>Receita</th>
+                    <th>Custo</th>
+                    <th>Lucro</th>
+                    <th>Ovos</th>
+                    <th>Ração kg</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="giPlantelDetalhes" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalhes do Plantel</h2>
+                <button type="button" class="close-btn" onclick="giFecharDetalhesPlantel()">&times;</button>
+            </div>
+            <div id="giPlantelDetalhesBody" class="details-grid"></div>
+        </div>
+    </div>
+</div>
+
+<div id="manejo-operacional" class="tab-content">
+    <div class="section-header">
+        <div>
+            <h2>Manejo</h2>
+            <p>Protocolos e tarefas programadas para os plantéis.</p>
+        </div>
+    </div>
+
+    <div class="form-container module-panel">
+        <h3>Manejo Programado</h3>
+        <form id="giProtocoloForm" class="grid-form">
+            <select name="plantel" class="gi-planteis" required></select>
+            <select name="protocolo" id="giProtocolos" required></select>
+            <button class="btn btn-primary" type="submit">Aplicar Protocolo</button>
+        </form>
+    </div>
+</div>
+
+<div id="nutricao-operacional" class="tab-content">
+    <div class="section-header">
+        <div>
+            <h2>Nutrição</h2>
+            <p>Consumo de ração, fórmulas e controle alimentar.</p>
+        </div>
+    </div>
+
+    <div class="form-container module-panel">
+        <h3>Nutrição e Ração</h3>
+        <form id="giConsumoRacaoForm" class="grid-form">
+            <select name="plantel" class="gi-planteis" required></select>
+            <select name="formula" id="giFormulas"></select>
+            <input name="quantidade_kg" type="number" step="0.001" placeholder="Quantidade kg" required>
+            <input name="data_consumo" type="date" required>
+            <button class="btn btn-primary" type="submit">Registrar Consumo</button>
+        </form>
+    </div>
+</div>
+
+<div id="sanidade-operacional" class="tab-content">
+    <div class="section-header">
+        <div>
+            <h2>Sanidade</h2>
+            <p>Ocorrências sanitárias, sintomas e enfermaria.</p>
+        </div>
+    </div>
+
+    <div class="form-container module-panel">
+        <h3>Sanidade e Enfermaria</h3>
+        <form id="giOcorrenciaForm" class="grid-form">
+            <select name="plantel" class="gi-planteis"></select>
+            <input name="data_ocorrencia" type="date" required>
+            <input name="diagnostico" placeholder="Diagnóstico/suspeita">
+            <textarea name="sintomas" placeholder="Sintomas observados" required></textarea>
+            <button class="btn btn-primary" type="submit">Registrar Ocorrência</button>
+        </form>
+    </div>
+</div>
+
+<div id="producao-operacional" class="tab-content">
+    <div class="section-header">
+        <div>
+            <h2>Produção</h2>
+            <p>Registros produtivos e indicadores diários.</p>
+        </div>
+    </div>
+
+    <div class="form-container module-panel">
+        <h3>Produção</h3>
+        <form id="giProducaoOvosForm" class="grid-form">
+            <select name="plantel" class="gi-planteis" required></select>
+            <input name="data_producao" type="date" required>
+            <input name="ovos_total" type="number" placeholder="Ovos total" required>
+            <input name="ovos_comerciais" type="number" placeholder="Comerciais">
+            <input name="ovos_descartados" type="number" placeholder="Descartados">
+            <input name="ovos_trincados" type="number" placeholder="Trincados">
+            <button class="btn btn-primary" type="submit">Registrar Ovos</button>
+        </form>
+    </div>
+</div>

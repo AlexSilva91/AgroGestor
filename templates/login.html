@@ -5,29 +5,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Haras Cavalcanti</title>
+    <title>Login - AgroGestor</title>
+    <script>
+        (function () {
+            var saved = localStorage.getItem('agrogestor-theme');
+            var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
 
 <body>
+    <button type="button" class="theme-toggle login-theme-toggle" data-theme-toggle aria-label="Alternar tema">
+        <i class="fas fa-moon"></i>
+    </button>
     <main>
         <div class="background-pattern"></div>
         <div class="container">
             <div class="login-container">
                 <div class="login-header">
-                    <i class="fas fa-horse-head cow-icon"></i>
-                    <h1>Haras <span>Cavalcanti</span></h1>
+                    <i class="fas fa-seedling cow-icon"></i>
+                    <h1>AgroGestor</h1>
                 </div>
 
                 <div class="login-form">
                     <form id="loginForm">
                         {% csrf_token %}
                         <div class="form-group">
-                            <label for="login">Login</label>
+                            <label for="email">E-mail</label>
                             <div class="input-with-icon">
-                                <i class="fas fa-user"></i>
-                                <input type="text" id="login" name="login" placeholder="joao.silva" required>
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="email" name="email" placeholder="seu@email.com" required>
                             </div>
                         </div>
 
@@ -55,6 +65,8 @@
     </main>
 
     {% include "base/footer.html" %}
+    <script src="{% static 'js/secure_fetch.js' %}"></script>
+    <script src="{% static 'js/theme_toggle.js' %}"></script>
     <script src="{% static 'js/login.js' %}"></script>
 </body>
 

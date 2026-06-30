@@ -3,17 +3,121 @@
         <div class="header-content">
             <div class="logo">
                 <i class="fas fa-tractor"></i>
-                <h1>Haras Cavalcanti</h1>
+                <h1>AgroGestor</h1>
             </div>
-            <nav>
+            <div class="farm-selector">
+                <label for="activeFarmSelect">Fazenda</label>
+                <select id="activeFarmSelect">
+                    {% for fazenda in fazendas %}
+                    <option value="{{ fazenda.id }}" {% if fazenda_ativa and fazenda.id == fazenda_ativa.id %}selected{% endif %}>
+                        {{ fazenda.nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <nav class="main-nav" aria-label="Menu principal">
                 <ul>
-                    <li><a href="#" class="active" data-page="dashboard">Dashboard</a></li>
-                    <li><a href="#" data-page="relatorios">Relatórios</a></li>
-                    <li><a href="#" data-page="configuracoes">Configurações</a></li>
-                    <li><a href="#" data-page="ajuda">Ajuda</a></li>
-                    <li><a href="#" data-page="Sair">Sair</a></li>
+                    <li>
+                        <a href="#" class="active nav-page-link" data-page="dashboard" title="Dashboard">
+                            <i class="fas fa-gauge-high"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <button type="button" class="tab" data-tab="lancamentos" data-module="financeiro" title="Financeiro" aria-label="Financeiro">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span>Financeiro</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="tab" data-tab="animais" data-module="rebanho" title="Animais" aria-label="Animais">
+                            <i class="fas fa-cow"></i>
+                            <span>Animais</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="tab" data-tab="rebanhos" data-module="rebanho" title="Rebanhos" aria-label="Rebanhos">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Rebanhos</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="tab" data-tab="pastagens" data-module="pastagem" title="Pastagens" aria-label="Pastagens">
+                            <i class="fas fa-seedling"></i>
+                            <span>Pastagens</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="tab" data-tab="movimentacoes" data-module="pastagem" title="Movimentações" aria-label="Movimentações">
+                            <i class="fas fa-route"></i>
+                            <span>Movimentações</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="tab" data-tab="gestao-integrada" data-module="gestao" title="Gestão" aria-label="Gestão">
+                            <i class="fas fa-warehouse"></i>
+                            <span>Gestão</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="tab" data-tab="manejo-operacional" data-module="manejo" title="Manejo" aria-label="Manejo">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Manejo</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="tab" data-tab="nutricao-operacional" data-module="nutricao" title="Nutrição" aria-label="Nutrição">
+                            <i class="fas fa-wheat-awn"></i>
+                            <span>Nutrição</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="tab" data-tab="sanidade-operacional" data-module="sanidade" title="Sanidade" aria-label="Sanidade">
+                            <i class="fas fa-kit-medical"></i>
+                            <span>Sanidade</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="tab" data-tab="producao-operacional" data-module="producao" title="Produção" aria-label="Produção">
+                            <i class="fas fa-chart-simple"></i>
+                            <span>Produção</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button type="button" class="tab" data-tab="usuarios" data-module="usuarios" title="Usuários" aria-label="Usuários">
+                            <i class="fas fa-users-gear"></i>
+                            <span>Usuários</span>
+                        </button>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-page-link" data-page="relatorios" title="Relatórios">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Relatórios</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-page-link" data-page="configuracoes" title="Configurações">
+                            <i class="fas fa-gear"></i>
+                            <span>Config.</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-page-link" data-page="ajuda" title="Ajuda">
+                            <i class="fas fa-circle-question"></i>
+                            <span>Ajuda</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-page-link" data-page="Sair" title="Sair">
+                            <i class="fas fa-right-from-bracket"></i>
+                            <span>Sair</span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
+            <button type="button" class="theme-toggle" data-theme-toggle aria-label="Alternar tema">
+                <i class="fas fa-moon"></i>
+            </button>
         </div>
     </div>
 </header>
